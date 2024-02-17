@@ -21,7 +21,8 @@ import random
 import json
 
 class Scene():
-    def __init__(self):
+    def __init__(self , viz_out):
+        self.viz_out = viz_out
         return
     
     def generate_scene(self , num_spheres , r_min , r_max , sparsity):
@@ -44,10 +45,11 @@ class Scene():
         scene_dict = json.load(open(filename))
         return scene_dict
     
-    def visualize_scene(self , scene , viz_out):
+    def visualize_scene(self , scene):
         for i in scene:
             geom = sphere(scene[i]['name'] , scene[i]['radius'] , scene[i]['position'] , scene[i]['orientation'] )
-            viz_out.add_obstacle(geom , scene[i]['color'])
+            self.viz_out.add_obstacle(geom , scene[i]['color'])
+        return self.viz_out
 
 if __name__ == "__main__":
     
@@ -60,11 +62,11 @@ if __name__ == "__main__":
 
     for i in scene_params_list:
         viz_out = threejs_group(js_dir="../js")
-        scene_obj = Scene()
+        scene_obj = Scene(viz_out)
         n_s , r_mi , r_ma , s , f_n = list(scene_params_list[i].values())
         scene_env_dict = scene_obj.generate_scene( n_s , r_mi , r_ma , s)
         scene_obj.scene_to_file(scene_env_dict , f_n)
-        scene_obj.visualize_scene(scene_env_dict , viz_out )
+        scene_env_loaded_dict = scene_obj.scene_from_file(f_n)
+        viz_out = scene_obj.visualize_scene(scene_env_loaded_dict )
         viz_file = "out/viz_" + f_n[:-3] + "html"
         viz_out.to_html(viz_file)
-
