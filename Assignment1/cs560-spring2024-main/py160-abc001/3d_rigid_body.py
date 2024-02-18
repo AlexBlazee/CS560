@@ -179,7 +179,10 @@ if __name__ == "__main__":
             if not rigid_body_motion.check_cell_collision(goal_pos[0] , goal_pos[1] , goal_pos[2]):
                 goal_flag = False
 
-        print(f"start position : {start_pos} and goal position : {goal_pos}")
+        # start_pos = [0,0,0] 
+        # goal_pos = [95,95,95]
+
+        print(f"start position : {np.array(start_pos) - 50} and goal position : {np.array(goal_pos) - 50}")
         final_path = rigid_body_motion.A_star(start_pos , goal_pos , scene_dict)
         print(f" The final path is :\n {final_path} ")
         rigid_body_motion.visualize_robot_path(final_path)
