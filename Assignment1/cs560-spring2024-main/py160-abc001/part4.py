@@ -85,7 +85,7 @@ if __name__ == "__main__":
     end_configuration = np.array([math.pi / 2, math.pi / 4, math.pi / 6])  
   
     path = robotic_arm.compute_arm_path(start_configuration, end_configuration)  
-    robotic_arm.visualize_arm_path(path)  
+    viz_out = robotic_arm.visualize_arm_path(path)  
   
     # Create output directory if it doesn't exist  
     output_dir = "out"  
@@ -93,5 +93,5 @@ if __name__ == "__main__":
         os.makedirs(output_dir)  
   
     # Save the HTML file  
-    viz_out.to_html(os.path.join(output_dir, "robotic_arm_path.html"))  
+    viz_out.to_html("out/robotic_arm_path.html") 
 
