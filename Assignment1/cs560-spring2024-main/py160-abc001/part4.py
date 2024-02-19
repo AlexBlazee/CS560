@@ -23,9 +23,9 @@ class RoboticArm:
     def compute_link_pose(self, configuration):
         theta1, theta2, theta3 = configuration
 
-        base_joint_axis = np.array([0, 0, 1])
-        link1_joint_axis = np.array([0, 1, 0])
-        link2_joint_axis = np.array([0, 1, 0])
+        base_joint_axis = np.array([0, 0, 0])
+        link1_joint_axis = quaternion.rotate_vectors(self.quaternion_rotation(np.array([0, 1, 0]), theta1), np.array([0, 1, 0]))
+        link2_joint_axis = quaternion.rotate_vectors(self.quaternion_rotation(np.array([0, 1, 0]), theta2), np.array([0, 1, 0]))
 
         base_joint_rot = self.quaternion_rotation(base_joint_axis, theta1)
         link1_joint_rot = self.quaternion_rotation(link1_joint_axis, theta2)
@@ -40,6 +40,7 @@ class RoboticArm:
         link2_world_pose = (link1_world_pose[0] + quaternion.rotate_vectors(link1_world_pose[1], link2_pose[0]), link1_world_pose[1] * link2_pose[1])
 
         return base_pose, link1_world_pose, link2_world_pose
+
 
     def compute_ik(self, current_configuration, end_goal, t):
         # Implement your inverse kinematics solver here to calculate joint angles
@@ -94,7 +95,8 @@ if __name__ == "__main__":
     robotic_arm = RoboticArm(viz_out)
 
     start_configuration = np.array([0.0, 0.0, 0.0])
-    end_goal = np.array([math.pi / 2, math.pi / 4, math.pi / 6])
+    #end_goal = np.array([math.pi / 2, math.pi / 4, math.pi / 6])
+    end_goal = np.array([math.pi , math.pi , math.pi ])
 
     path = robotic_arm.compute_arm_path(start_configuration, end_goal)
     viz_out = robotic_arm.visualize_arm_path(path)
