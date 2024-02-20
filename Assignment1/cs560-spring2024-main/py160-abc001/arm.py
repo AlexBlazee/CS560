@@ -2,13 +2,13 @@ import numpy as np
 from geometry import box
 from threejs_group import threejs_group as viz_group
 
-class RoboticArmController:
+class RoboticArmTransformer:
     @staticmethod
-    def create_quaternion_from_y_angle(theta):
+    def rotate_y_quaternion(theta):
         return [np.cos(theta/2), 0, np.sin(theta/2), 0]
 
     @staticmethod
-    def create_quaternion_from_z_angle(theta):
+    def rotate_z_quaternion(theta):
         return [np.cos(theta/2), 0, 0, np.sin(theta/2)]
 
     @staticmethod
@@ -22,7 +22,7 @@ class RoboticArmController:
         return [w, x, y, z]
 
     @staticmethod
-    def convert_quaternion_to_matrix(q):
+    def quaternion_to_matrix(q):
         w, x, y, z = q
         return np.array([
             [1 - 2*y*y - 2*z*z, 2*x*y - 2*z*w, 2*x*z + 2*y*w],
@@ -30,16 +30,16 @@ class RoboticArmController:
             [2*x*z - 2*y*w, 2*y*z + 2*x*w, 1 - 2*x*x - 2*y*y]])
 
 class ModifiedRoboticArm:
-    def __init__(self, viz_output):
-        self.viz_output = viz_output
-        self.controller = RoboticArmController()
+    def __init__(self, visualization):
+        self.visualization = visualization
+        self.transformer = RoboticArmTransformer()
 
     def apply_transformation(self, position, quaternion, point):
-        rotation_matrix = self.controller.convert_quaternion_to_matrix(quaternion)
+        rotation_matrix = self.transformer.quaternion_to_matrix(quaternion)
         transformed_point = np.dot(rotation_matrix, point) + position
         return transformed_point.tolist()
 
-    def forward_kinematics_calculation(self, configuration):
+    def calculate_forward_kinematics(self, configuration):
         theta1, theta2, theta3 = configuration
 
         base_dimensions = [2, 2, 0.5]
@@ -47,18 +47,18 @@ class ModifiedRoboticArm:
         link2_dimensions = [1, 1, 4]
 
         base_position = [0, 0, base_dimensions[2] / 2]
-        base_orientation = self.controller.create_quaternion_from_z_angle(theta1)
+        base_orientation = self.transformer.rotate_z_quaternion(theta1)
 
         j1_position = [0, 0, base_dimensions[2]]
-        link1_orientation = self.controller.multiply_quaternions(
-            base_orientation, self.controller.create_quaternion_from_y_angle(theta2))
+        link1_orientation = self.transformer.multiply_quaternions(
+            base_orientation, self.transformer.rotate_y_quaternion(theta2))
         link1_position = self.apply_transformation(
             j1_position, link1_orientation, [0, 0, link1_dimensions[2] / 2])
 
         j2_position = self.apply_transformation(
             j1_position, link1_orientation, [0, 0, link1_dimensions[2]])
-        link2_orientation = self.controller.multiply_quaternions(
-            link1_orientation, self.controller.create_quaternion_from_y_angle(theta3))
+        link2_orientation = self.transformer.multiply_quaternions(
+            link1_orientation, self.transformer.rotate_y_quaternion(theta3))
         link2_position = self.apply_transformation(
             j2_position, link2_orientation, [0, 0, link2_dimensions[2] / 2])
 
@@ -70,7 +70,7 @@ class ModifiedRoboticArm:
 
         return transformations
 
-    def compute_arm_path(self, start_configuration, end_configuration, steps=100):
+    def calculate_arm_path(self, start_configuration, end_configuration, steps=100):
         path = []
         for t in np.linspace(0, 1, steps):
             interpolated_configuration = tuple(
@@ -81,12 +81,12 @@ class ModifiedRoboticArm:
     def visualize_arm_path(self, start_configuration, end_configuration):
         viz_output = viz_group(js_dir="../js")
 
-        path = self.compute_arm_path(start_configuration, end_configuration)
+        path = self.calculate_arm_path(start_configuration, end_configuration)
 
         boxes = {
-            'link0': box("base", 2, 2, 0.5, [0, 0, 0], self.controller.create_quaternion_from_z_angle(0)),
-            'link1': box("link1", 1, 1, 4, [0, 0, 0], self.controller.create_quaternion_from_y_angle(0)),
-            'link2': box("link2", 1, 1, 4, [0, 0, 0], self.controller.create_quaternion_from_y_angle(0))
+            'link0': box("base", 2, 2, 0.5, [0, 0, 0], self.transformer.rotate_z_quaternion(0)),
+            'link1': box("link1", 1, 1, 4, [0, 0, 0], self.transformer.rotate_y_quaternion(0)),
+            'link2': box("link2", 1, 1, 4, [0, 0, 0], self.transformer.rotate_y_quaternion(0))
         }
         link_colors = {
             'link0': "0xFF0000",
@@ -97,7 +97,7 @@ class ModifiedRoboticArm:
         keyframes = {name: [] for name in boxes}
 
         for t, configuration in enumerate(path):
-            transformations = self.forward_kinematics_calculation(configuration)
+            transformations = self.calculate_forward_kinematics(configuration)
             for i, transformation in enumerate(transformations):
                 position, quaternion = transformation
                 keyframes[f'link{i}'].append({
@@ -110,13 +110,12 @@ class ModifiedRoboticArm:
             animation_data = [(kf['time'], kf['position'], kf['quaternion'], link_colors[name]) for kf in keyframe_data]
             viz_output.add_animation(boxes[name], animation_data)
 
-        viz_output.to_html("robotic_arm_path.html", "out/")
+        viz_output.to_html("modified_robotic_arm_path.html", "out/")
 
 if __name__ == "__main__":
-    viz_out = viz_group(js_dir="../js")
-    modified_robotic_arm = ModifiedRoboticArm(viz_out)
+    modified_viz_output = viz_group(js_dir="../js")
+    modified_robotic_arm = ModifiedRoboticArm(modified_viz_output)
 
-    # Randomized initial and final configurations
     initial_configuration = np.random.uniform(-np.pi, np.pi, 3)
     final_configuration = np.random.uniform(-np.pi, np.pi, 3)
 
