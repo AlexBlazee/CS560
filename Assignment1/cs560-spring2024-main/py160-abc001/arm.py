@@ -2,40 +2,16 @@ import numpy as np
 from geometry import box
 from threejs_group import threejs_group as viz_group
 
-class RoboticArmTransformer:
-    @staticmethod
-    def rotate_y_quaternion(theta):
-        return [np.cos(theta/2), 0, np.sin(theta/2), 0]
-
-    @staticmethod
-    def rotate_z_quaternion(theta):
-        return [np.cos(theta/2), 0, 0, np.sin(theta/2)]
-
-    @staticmethod
-    def multiply_quaternions(q1, q2):
-        w1, x1, y1, z1 = q1
-        w2, x2, y2, z2 = q2
-        w = w1*w2 - x1*x2 - y1*y2 - z1*z2
-        x = w1*x2 + x1*w2 + y1*z2 - z1*y2
-        y = w1*y2 + y1*w2 + z1*x2 - x1*z2
-        z = w1*z2 + z1*w2 + x1*y2 - y1*x2
-        return [w, x, y, z]
-
-    @staticmethod
-    def quaternion_to_matrix(q):
-        w, x, y, z = q
-        return np.array([
-            [1 - 2*y*y - 2*z*z, 2*x*y - 2*z*w, 2*x*z + 2*y*w],
-            [2*x*y + 2*z*w, 1 - 2*x*x - 2*z*z, 2*y*z - 2*x*w],
-            [2*x*z - 2*y*w, 2*y*z + 2*x*w, 1 - 2*x*x - 2*y*y]])
-
-class ModifiedRoboticArm:
+class RoboticArm:
     def __init__(self, visualization):
         self.visualization = visualization
-        self.transformer = RoboticArmTransformer()
 
     def apply_transformation(self, position, quaternion, point):
-        rotation_matrix = self.transformer.quaternion_to_matrix(quaternion)
+        rotation_matrix = np.array([
+            [1 - 2 * quaternion[2]**2 - 2 * quaternion[3]**2, 2 * quaternion[1] * quaternion[2] - 2 * quaternion[0] * quaternion[3], 2 * quaternion[1] * quaternion[3] + 2 * quaternion[0] * quaternion[2]],
+            [2 * quaternion[1] * quaternion[2] + 2 * quaternion[0] * quaternion[3], 1 - 2 * quaternion[1]**2 - 2 * quaternion[3]**2, 2 * quaternion[2] * quaternion[3] - 2 * quaternion[0] * quaternion[1]],
+            [2 * quaternion[1] * quaternion[3] - 2 * quaternion[0] * quaternion[2], 2 * quaternion[2] * quaternion[3] + 2 * quaternion[0] * quaternion[1], 1 - 2 * quaternion[1]**2 - 2 * quaternion[2]**2]
+        ])
         transformed_point = np.dot(rotation_matrix, point) + position
         return transformed_point.tolist()
 
@@ -47,18 +23,26 @@ class ModifiedRoboticArm:
         link2_dimensions = [1, 1, 4]
 
         base_position = [0, 0, base_dimensions[2] / 2]
-        base_orientation = self.transformer.rotate_z_quaternion(theta1)
+        base_orientation = [np.cos(theta1/2), 0, 0, np.sin(theta1/2)]
 
         j1_position = [0, 0, base_dimensions[2]]
-        link1_orientation = self.transformer.multiply_quaternions(
-            base_orientation, self.transformer.rotate_y_quaternion(theta2))
+        link1_orientation = [
+            np.cos((theta1 + theta2)/2),
+            np.sin((theta1 + theta2)/2),
+            0,
+            0
+        ]
         link1_position = self.apply_transformation(
             j1_position, link1_orientation, [0, 0, link1_dimensions[2] / 2])
 
         j2_position = self.apply_transformation(
             j1_position, link1_orientation, [0, 0, link1_dimensions[2]])
-        link2_orientation = self.transformer.multiply_quaternions(
-            link1_orientation, self.transformer.rotate_y_quaternion(theta3))
+        link2_orientation = [
+            np.cos((theta1 + theta2 + theta3)/2),
+            np.sin((theta1 + theta2 + theta3)/2),
+            0,
+            0
+        ]
         link2_position = self.apply_transformation(
             j2_position, link2_orientation, [0, 0, link2_dimensions[2] / 2])
 
@@ -70,7 +54,7 @@ class ModifiedRoboticArm:
 
         return transformations
 
-    def calculate_arm_path(self, start_configuration, end_configuration, steps=100):
+    def compute_arm_path(self, start_configuration, end_configuration, steps=100):
         path = []
         for t in np.linspace(0, 1, steps):
             interpolated_configuration = tuple(
@@ -81,12 +65,22 @@ class ModifiedRoboticArm:
     def visualize_arm_path(self, start_configuration, end_configuration):
         viz_output = viz_group(js_dir="../js")
 
-        path = self.calculate_arm_path(start_configuration, end_configuration)
+        path = self.compute_arm_path(start_configuration, end_configuration)
 
         boxes = {
-            'link0': box("base", 2, 2, 0.5, [0, 0, 0], self.transformer.rotate_z_quaternion(0)),
-            'link1': box("link1", 1, 1, 4, [0, 0, 0], self.transformer.rotate_y_quaternion(0)),
-            'link2': box("link2", 1, 1, 4, [0, 0, 0], self.transformer.rotate_y_quaternion(0))
+            'link0': box("base", 2, 2, 0.5, [0, 0, 0], [np.cos(0/2), 0, 0, np.sin(0/2)]),
+            'link1': box("link1", 1, 1, 4, [0, 0, 0], [
+                np.cos((start_configuration[0] + start_configuration[1])/2),
+                np.sin((start_configuration[0] + start_configuration[1])/2),
+                0,
+                0
+            ]),
+            'link2': box("link2", 1, 1, 4, [0, 0, 0], [
+                np.cos((start_configuration[0] + start_configuration[1] + start_configuration[2])/2),
+                np.sin((start_configuration[0] + start_configuration[1] + start_configuration[2])/2),
+                0,
+                0
+            ])
         }
         link_colors = {
             'link0': "0xFF0000",
@@ -110,11 +104,12 @@ class ModifiedRoboticArm:
             animation_data = [(kf['time'], kf['position'], kf['quaternion'], link_colors[name]) for kf in keyframe_data]
             viz_output.add_animation(boxes[name], animation_data)
 
-        viz_output.to_html("modified_robotic_arm_path.html", "out/")
+        viz_output.to_html("robotic_arm_path.html", "out/")
+
 
 if __name__ == "__main__":
     modified_viz_output = viz_group(js_dir="../js")
-    modified_robotic_arm = ModifiedRoboticArm(modified_viz_output)
+    modified_robotic_arm = RoboticArm(modified_viz_output)
 
     initial_configuration = np.random.uniform(-np.pi, np.pi, 3)
     final_configuration = np.random.uniform(-np.pi, np.pi, 3)
