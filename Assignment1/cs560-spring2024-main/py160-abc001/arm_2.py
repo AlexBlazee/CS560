@@ -1,5 +1,5 @@
 import numpy as np
-from geometry import box
+from geometry import * 
 from threejs_group import threejs_group as viz_group
 
 class RoboticArmTransformer:
@@ -33,6 +33,9 @@ class ModifiedRoboticArm:
     def __init__(self, visualization):
         self.visualization = visualization
         self.transformer = RoboticArmTransformer()
+        self.box_info = {0 : { "name" : "base" , "size" : [2, 2, 0.5] , "color" : "0xFF0000"},
+                    1 : { "name" : "link1" ,"size" : [1, 1, 4  ] , "color" : "0x000000"},
+                    2 : { "name" : "link2" ,"size" : [1, 1, 4  ] , "color" : "0xFFFF00"}}
 
     def apply_transformation(self, position, quaternion, point):
         rotation_matrix = self.transformer.quaternion_to_matrix(quaternion)
@@ -74,18 +77,14 @@ class ModifiedRoboticArm:
         return path
 
     def visualize_arms(self , configurations , viz_out):
-
-        viz_output = viz_group(js_dir="../js")
-        box_info = {0 : { "name" : "base" , "size" : [2, 2, 0.5] , "color" : "0xFF0000"},
-                    1 : { "name" : "link1" ,"size" : [1, 1, 4  ] , "color" : "0x000000"},
-                    2 : { "name" : "link2" ,"size" : [1, 1, 4  ] , "color" : "0xFFFF00"}}
-                
+        # TODO: visualization is not working , giving a file error, CORRECT THE CODE
+        viz_output = viz_group(js_dir="../js")       
         for configuration in configurations:
             transformations = self.calculate_forward_kinematics(configuration)
             for i, transformation in enumerate(transformations):
                 position, quaternion = transformation
-                geom = box(box_info[i]["name"] , box_info[i]["size"][0] , box_info[i]["size"][1] , box_info[i]["size"][2] , position , quaternion)
-                viz_output.add_obstacle(geom , box_info[i]["color"])
+                geom = box(self.box_info[i]["name"] , self.box_info[i]["size"][0] , self.box_info[i]["size"][1] ,self.box_info[i]["size"][2] , position , quaternion)
+                viz_output.add_obstacle(geom , self.box_info[i]["color"])
         
         viz_output.to_html("out\\nearest_neigbours_arm_configs.html")
 
@@ -122,6 +121,48 @@ class ModifiedRoboticArm:
             viz_output.add_animation(boxes[name], animation_data)
 
         viz_output.to_html("modified_robotic_arm_path.html", "out/")
+
+    def aabb_single_obstacle_collision_check(self , configuration , sphere_position , sphere_radius):
+        # TODO : Yet to test the code
+        #reference : https://developer.mozilla.org/en-US/docs/Games/Techniques/3D_collision_detection
+        transformations = self.calculate_forward_kinematics(configuration)
+        r = sphere_radius
+        s_x,s_y,s_z = np.array(sphere_position)
+        distance = []
+        for i, [position,orientation] in enumerate(transformations):
+            lx,ly,lz = np.array(self.box_info[i]["size"])/2
+            local_vertices = np.array([[-lx,-ly,-ly],[lx,-ly,-lz],[-lx,ly,-lz],[lx,ly,-lz],[-lx,-ly,lz],[lx,-ly,lz],[-lx,ly,lz],[lx,ly,lz]])
+            rotation_matrix = self.transformer.quaternion_to_matrix(orientation)
+            transformed_points = np.dot(rotation_matrix, local_vertices.T)
+            x_min,y_min,z_min = np.min(transformed_points , axis = 1) + position
+            x_max,y_max,z_max = np.max(transformed_points , axis = 1) + position
+            # get box closest point to sphere center by clamping
+            X = max(x_min , min(s_x , x_max))
+            Y = max(y_min , min(s_y , y_max))
+            Z = max(z_min , min(s_z , z_max))
+            distance.append(np.sqrt((X - s_x)*(X - s_x)  + (Y - s_y)*(Y - s_y) + (Z - s_z)*(Z - s_z)))
+        
+        if np.sum(np.array(distance) < r) == 3 :
+            return False
+        else:
+            return True
+
+    def aabb_env_obstacle_collision_check(self , configuration , obstacles_dict):
+        for i in obstacles_dict:
+            _,r_s,p_s,_,_ = list(obstacles_dict[i].values())
+            if self.aabb_single_obstacle_collision_check(configuration , p_s , r_s):
+                return True
+        return False
+
+    def calculate_arm_path_without_collision(self, start_configuration, end_configuration, obstacles_dict, steps=100):
+        path = []
+        for t in np.linspace(0, 1, steps):
+            interpolated_configuration =  np.array(start_configuration) + t * (np.array(end_configuration) - np.array(start_configuration))
+            if self.aabb_env_obstacle_collision_check(interpolated_configuration , obstacles_dict) == True:
+                return -1
+            path.append(tuple(interpolated_configuration))
+        return path    
+
 
 if __name__ == "__main__":
     modified_viz_output = viz_group(js_dir="../js")
