@@ -35,8 +35,7 @@ class NearestNeighbour():
     def get_nearest_neighbors(self, robot, target, configs, k):
         distances = [(config, self.get_config_distance( robot , config, target)) for config in configs]
         sorted_distances = sorted(distances, key=lambda x: x[1])
-        nearest_neighbors = [config for config, _ in sorted_distances[:k]]
-        return nearest_neighbors
+        return sorted_distances[:k]
 
     def visulalize(self , nearest_configs , target , viz_out):
         list_of_configs = nearest_configs
@@ -65,12 +64,14 @@ if __name__ == "__main__":
     args , configs =  nearestNeighbour.input_parser()
  
     nearest_neighbors = nearestNeighbour.get_nearest_neighbors(args.robot, args.target, configs, args.k)
-
+    neighbors = []
     print(f"Nearest {args.k} neighbors for target {args.target}:")
-    for neighbor in nearest_neighbors:
+
+    for neighbor,_ in nearest_neighbors:
+        neighbors.append(neighbor)
         print(neighbor)
     print("==================")
-    nearestNeighbour.visulalize(nearest_neighbors , args.target , viz_out)
+    nearestNeighbour.visulalize(neighbors , args.target , viz_out)
     
 
 # TODO:

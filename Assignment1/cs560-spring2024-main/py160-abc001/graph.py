@@ -1,10 +1,14 @@
+import numpy as np
+
 class Graph:
     def __init__(self):
         self.graph = {}
+        self.all_configs = set()
 
     def add_node(self, node):
         if node not in self.graph:
             self.graph[node] = []
+            self.all_configs.add(tuple(np.frombuffer(node)))
 
     def add_edge(self, node1, node2, weight):
         self.add_node(node1)
@@ -13,8 +17,8 @@ class Graph:
         self.graph[node2].append((node1, weight))  # For undirected graph
 
         # Sort neighbors based on weights
-        self.graph[node1] = sorted(self.graph[node1], key=lambda x: x[1])
-        self.graph[node2] = sorted(self.graph[node2], key=lambda x: x[1])
+        # self.graph[node1] = sorted(self.graph[node1], key=lambda x: x[1])
+        # self.graph[node2] = sorted(self.graph[node2], key=lambda x: x[1])
 
     def get_all_neighbors(self, node):
         return self.graph.get(node, [])

@@ -20,6 +20,7 @@ class PRM():
         self.k_nearest = 6
         self.mra = ModifiedRoboticArm(self.viz_out)
         self.graph = Graph()
+        self.nearest_neighbor = NearestNeighbour(self.viz_out)
         
     def input_parser(self):
         parser = argparse.ArgumentParser()
@@ -55,6 +56,18 @@ class PRM():
             return True # no collision
         else:
             return False
+        
+    def connect_initial_nodes(self):
+        for node_1 in self.graph.keys():
+            for node_2 in self.graph.keys():
+                if node_1 != node_2:
+                    r_node_1 = np.frombuffer(node_1 , dtype= float)
+                    r_node_2 = np.frombuffer(node_2 , dtype= float)
+                    if self.is_valid_edge(r_node_1 , r_node_2):                    
+                        distance = self.nearest_neighbor.get_config_distance(self.robot_type , r_node_1 , r_node_2)
+                        self.graph.add_edge(node_1 , node_2 , distance)
+        return
+
 
     def build_graph(self):
         self.graph.add_node(self.start.tobytes())
@@ -73,7 +86,14 @@ class PRM():
 
             self.graph.add_node(new_sample_config.to_bytes())
             # find the neighbourhood of new sample and add valid edges
-            if (i >= 6) :
+            if (i == 6) :
+                self.connect_initial_nodes()
+            if (i > 6):
+                neighbor_info = self.nearest_neighbor.get_nearest_neighbors(self.robot_type , new_sample_config , self.graph.all_configs , self.k_nearest)
+                for neigh_config,distance in neighbor_info:
+                    if self.is_valid_edge(new_sample_config , neigh_config):
+                        self.graph.add_edge(new_sample_config , neigh_config , distance)
+
                 # find nearest neighbour configs
                 
 
@@ -85,6 +105,7 @@ class PRM():
         
 
     def search_path(self):
+        return
 
 
 
