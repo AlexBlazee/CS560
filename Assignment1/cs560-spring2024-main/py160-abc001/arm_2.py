@@ -147,18 +147,18 @@ class ModifiedRoboticArm:
         else:
             return True
 
-    def aabb_env_obstacle_collision_check(self , configuration , obstacles_dict):
-        for i in obstacles_dict:
-            _,r_s,p_s,_,_ = list(obstacles_dict[i].values())
-            if self.aabb_single_obstacle_collision_check(configuration , p_s , r_s):
+    def aabb_env_obstacle_collision_check(self , configuration , obstacles_list):
+        for obstacle in obstacles_list:
+            #x,y,z,r = obstacle
+            if self.aabb_single_obstacle_collision_check(configuration , obstacle[:3] , obstacle[3]):
                 return True
         return False
 
-    def calculate_arm_path_without_collision(self, start_configuration, end_configuration, obstacles_dict, steps=100):
+    def calculate_arm_path_without_collision(self, start_configuration, end_configuration, obstacles_list, steps=100):
         path = []
         for t in np.linspace(0, 1, steps):
             interpolated_configuration =  np.array(start_configuration) + t * (np.array(end_configuration) - np.array(start_configuration))
-            if self.aabb_env_obstacle_collision_check(interpolated_configuration , obstacles_dict) == True:
+            if self.aabb_env_obstacle_collision_check(interpolated_configuration , obstacles_list) == True:
                 return -1
             path.append(tuple(interpolated_configuration))
         return path    
