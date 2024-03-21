@@ -117,6 +117,9 @@ class PRM():
         print("Path couldn't be found")
         return None
     
+    def visualize(self):
+        return
+
 if __name__ == "__main__":
     viz_out = threejs_group(js_dir="../js")
     parser = argparse.ArgumentParser()
@@ -146,3 +149,4 @@ if __name__ == "__main__":
         for configuration in final_path:
             print(configuration)
 
+    

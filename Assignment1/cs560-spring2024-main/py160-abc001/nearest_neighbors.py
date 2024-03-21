@@ -4,6 +4,7 @@ import numpy as np
 from geometry import * 
 from threejs_group import *
 from arm_2 import *
+import math
 
 class NearestNeighbour():
     def __init__(self , viz_out) -> None:
@@ -36,6 +37,14 @@ class NearestNeighbour():
         distances = [(config, self.get_config_distance( robot , config, target)) for config in configs]
         sorted_distances = sorted(distances, key=lambda x: x[1])
         return sorted_distances[:k+1]
+    
+    def get_prm_star_nearest_neighbors( self , robot , target , configs , k , radius , sample_count , gamma , d):
+        distances = [[config, self.get_config_distance( robot , config, target)] for config in configs]
+        radius = gamma * math.pow( (math.log10(sample_count)/sample_count) , 1/d)
+        sorted_distances = sorted(distances, key=lambda x: x[1])
+        neighbor_list = [sublist for sublist in sorted_distances if sublist[1] <= radius]
+        return neighbor_list
+
 
     def visulalize(self , nearest_configs , target , viz_out):
         list_of_configs = nearest_configs
