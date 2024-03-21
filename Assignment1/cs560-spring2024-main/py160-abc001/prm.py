@@ -7,6 +7,7 @@ from arm_2 import *
 from nearest_neighbors import * 
 from arm_2 import ModifiedRoboticArm
 from graph import *
+import heapq
 
 class PRM():
     def __init__(self , robot_type , start , goal, obstacles_file, viz_out) -> None:
@@ -81,7 +82,6 @@ class PRM():
                 new_sample_config = self.generate_random_config()
                 if self.is_valid_node(new_sample_config):
                     flag = False
-                if(flag == False):
                     break
 
             self.graph.add_node(new_sample_config.to_bytes())
@@ -96,19 +96,26 @@ class PRM():
 
                 # find nearest neighbour configs
                 
-
-
-        
-            
-
-            
-        
-
     def search_path(self):
-        return
-
-
-
+        visited = set()
+        queue = [(0 , self.start.tobytes() , [])]
+        
+        while queue:
+            cost , current_node , path = heapq.heappop(queue)
+            if current_node in visited:
+                continue
+            visited.add(current_node)
+            path.append(np.frombuffer(current_node))
+            if current_node == self.goal.tobytes():
+                return path
+            
+            for neighbor,distance in self.graph.get_all_neighbors(current_node):
+                if neighbor not in visited:
+                    new_cost = cost + distance
+                    heapq.heappush(queue , (new_cost , neighbor , path.copy()))
+        print("Path couldn't be found")
+        return None
+    
 if __name__ == "__main__":
     viz_out = threejs_group(js_dir="../js")
     prm = PRM()

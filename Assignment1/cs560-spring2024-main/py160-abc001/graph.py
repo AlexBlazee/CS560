@@ -29,4 +29,4 @@ if __name__ == "__main__":
     graph.add_edge('B', 'C', 3)
     graph.add_edge('A', 'C', 7)
 
-    print(graph.get_neighbors('A'))
+    print(graph.get_all_neighbors('A'))
