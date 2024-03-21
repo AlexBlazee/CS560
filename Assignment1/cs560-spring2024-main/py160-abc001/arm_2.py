@@ -124,8 +124,10 @@ class ModifiedRoboticArm:
 
     def aabb_single_obstacle_collision_check(self , configuration , sphere_position , sphere_radius):
         # TODO : Yet to test the code
-        #reference : https://developer.mozilla.org/en-US/docs/Games/Techniques/3D_collision_detection
+        #reference : https://developer.mozilla.org/en-US/docs/Games/Techniques/3D_collision_detection\\
+        
         transformations = self.calculate_forward_kinematics(configuration)
+        # print(f" The transformations are :" , transformations)
         r = sphere_radius
         s_x,s_y,s_z = np.array(sphere_position)
         distance = []
@@ -142,7 +144,8 @@ class ModifiedRoboticArm:
             Z = max(z_min , min(s_z , z_max))
             distance.append(np.sqrt((X - s_x)*(X - s_x)  + (Y - s_y)*(Y - s_y) + (Z - s_z)*(Z - s_z)))
         
-        if np.sum(np.array(distance) < r) == 3 :
+        # print(f" The collsion check distance : {distance} and radius :{ r}")
+        if np.sum(np.array(distance) > r) == 3 :
             return False
         else:
             return True

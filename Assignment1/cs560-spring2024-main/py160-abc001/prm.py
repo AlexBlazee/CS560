@@ -17,21 +17,12 @@ class PRM():
         self.goal = np.array(goal)
         self.obstacles = self.read_obstacles(obstacles_file)
         self.graph = {}
-        self.max_nodes = 5000
+        self.max_nodes = 10
         self.k_nearest = 6
         self.mra = ModifiedRoboticArm(self.viz_out)
         self.graph = Graph()
         self.nearest_neighbor = NearestNeighbour(self.viz_out)
         
-    def input_parser(self):
-        parser = argparse.ArgumentParser()
-        parser.add_argument("--robot", type= str , required=True, choices=["arm", "vehicle"])
-        parser.add_argument("--start", type=float, nargs="+", required=True)
-        parser.add_argument("--goal", type=float, nargs="+" , required=True)
-        parser.add_argument("--map", type= str ,required=True)    
-        args = parser.parse_args()
-        return args
-
     def read_obstacles(self, obstacle_file):
         obstacles = []
         with open(obstacle_file, 'r') as file:
@@ -58,44 +49,54 @@ class PRM():
         else:
             return False
         
-    def connect_initial_nodes(self):
-        for node_1 in self.graph.keys():
-            for node_2 in self.graph.keys():
-                if node_1 != node_2:
-                    r_node_1 = np.frombuffer(node_1 , dtype= float)
-                    r_node_2 = np.frombuffer(node_2 , dtype= float)
-                    if self.is_valid_edge(r_node_1 , r_node_2):                    
-                        distance = self.nearest_neighbor.get_config_distance(self.robot_type , r_node_1 , r_node_2)
-                        self.graph.add_edge(node_1 , node_2 , distance)
+    def connect_initial_nodes(self , is_direct = True):
+        node_list = [np.array(x) for x  in self.graph.get_nodes()]
+        
+        for node_1 in node_list:
+            for node_2 in node_list:
+                if (node_1 != node_2).all():
+                    if is_direct == False:
+                        if( ((node_1 == self.start).all() or (node_1 == self.goal).all()) and ((node_2 == self.start).all() or (node_2 == self.goal).all())):
+                            continue
+                    # print("Nodes", node_1 , node_2)
+                    if self.is_valid_edge(node_1 , node_2):                    
+                        distance = self.nearest_neighbor.get_config_distance(self.robot_type , node_1 , node_2)
+                        self.graph.add_edge(node_1.tobytes() , node_2.tobytes() , distance)
+        
+        # self.graph.print_node_info()
+        # print("----------------------------")
+
         return
 
 
-    def build_graph(self):
+    def build_graph(self , is_direct):
         self.graph.add_node(self.start.tobytes())
         self.graph.add_node(self.goal.tobytes())
-        
 
         for i in range(2, self.max_nodes):
             # sample the new configuration
+            if i%500 ==0 :
+                print(i , end= ' ')
             flag = True
             while(flag):
                 new_sample_config = self.generate_random_config()
-                if self.is_valid_node(new_sample_config):
+                # print(f"\n{new_sample_config} \n ")
+                if self.is_valid_node(new_sample_config) and tuple(new_sample_config) not in self.graph.all_configs:
                     flag = False
                     break
-
-            self.graph.add_node(new_sample_config.to_bytes())
+            self.graph.add_node(new_sample_config.tobytes())
             # find the neighbourhood of new sample and add valid edges
             if (i == 6) :
-                self.connect_initial_nodes()
+                self.connect_initial_nodes(is_direct)
             if (i > 6):
                 neighbor_info = self.nearest_neighbor.get_nearest_neighbors(self.robot_type , new_sample_config , self.graph.all_configs , self.k_nearest)
                 for neigh_config,distance in neighbor_info:
-                    if self.is_valid_edge(new_sample_config , neigh_config):
-                        self.graph.add_edge(new_sample_config , neigh_config , distance)
+                    if self.is_valid_edge(new_sample_config , neigh_config) and (new_sample_config != neigh_config).all():
+                        self.graph.add_edge(new_sample_config.tobytes() , np.array(neigh_config).tobytes() , distance)
 
                 # find nearest neighbour configs
-                
+        return
+
     def search_path(self):
         visited = set()
         queue = [(0 , self.start.tobytes() , [])]
@@ -118,10 +119,30 @@ class PRM():
     
 if __name__ == "__main__":
     viz_out = threejs_group(js_dir="../js")
-    prm = PRM()
-    args = prm.input_parser()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--robot", type= str , required=True, choices=["arm", "vehicle"])
+    parser.add_argument("--start", type=float, nargs="+", required=True)
+    parser.add_argument("--goal", type=float, nargs="+" , required=True)
+    parser.add_argument("--map", type= str ,required=True)    
+    args = parser.parse_args()
 
     robot_type = args.robot
     start_config = args.start
     goal_config = args.goal
     obstacles_file = args.map   
+
+    # print(robot_type , start_config , goal_config, obstacles_file)
+    prm = PRM(robot_type , start_config , goal_config, obstacles_file, viz_out)
+    # print("PRM object instantiated")
+    # print(prm.obstacles)
+    is_direct = False  # can it move directly from the start state to goal state 
+    prm.build_graph(is_direct)
+    # print("Graph Nodes:")
+    # prm.graph.print_node_info()
+    final_path = prm.search_path()
+
+    if final_path:
+        print(" Final Path :\n")
+        for configuration in final_path:
+            print(configuration)
+
