@@ -46,12 +46,11 @@ class NearestNeighbour():
         return neighbor_list
 
 
-    def visulalize(self , nearest_configs , target , viz_out):
+    def visulalize(self , nearest_configs , target ):
         list_of_configs = nearest_configs
         list_of_configs.append(target)
-        modified_robotic_arm = ModifiedRoboticArm(viz_out)
-        modified_robotic_arm.visualize_arms(list_of_configs , viz_out)
-        return
+        modified_robotic_arm = ModifiedRoboticArm(self.viz_out)
+        return modified_robotic_arm.visualize_arms(list_of_configs)
 
 if __name__ == "__main__":
 
@@ -80,8 +79,9 @@ if __name__ == "__main__":
         neighbors.append(neighbor)
         print(neighbor)
     print("==================")
-    nearestNeighbour.visulalize(neighbors , args.target , viz_out)
-    
+    nearestNeighbour.visulalize(neighbors , args.target)
+    viz_out.to_html("nearest_neigbours_arm_configs.html", "out/")
+ 
 
 # TODO:
 # 1. Describe briefly your implementation in the report.Make sure that you reason correctly regarding the topology of the robot’s configuration space 

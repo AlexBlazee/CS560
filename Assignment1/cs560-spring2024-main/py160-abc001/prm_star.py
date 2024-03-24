@@ -8,11 +8,11 @@ from prm import *
 class PRM_STAR(PRM):
     def __init__(self, robot_type, start, goal, obstacles_file, viz_out) -> None:
         super().__init__(robot_type, start, goal, obstacles_file, viz_out)
-        if robot_type == 'arm':
-            self.dim = 3
-        elif robot_type == 'vehicle':
-            self.dim = 7
-    
+        # if robot_type == 'arm':
+        #     self.dim = 3
+        # elif robot_type == 'vehicle':
+        #     self.dim = 7
+
     def build_graph(self , is_direct):
         self.graph.add_node(self.start.tobytes())
         self.graph.add_node(self.goal.tobytes())
@@ -31,7 +31,8 @@ class PRM_STAR(PRM):
             if i == 6:
                 self.connect_initial_nodes(is_direct)
             if i > 6 :
-                neighbor_info = self.nearest_neighbor.get_prm_star_nearest_neighbors(self.robot_type , new_sample_config , self.graph.all_configs , self.k_nearest , i , self.gamma , self.dim)
+                # neighbor_info = self.nearest_neighbor.get_prm_star_nearest_neighbors(self.robot_type , new_sample_config , self.graph.all_configs , self.k_nearest , i , self.gamma , self.dim)
+                neighbor_info = self.nearest_neighbor.get_nearest_neighbors(self.robot_type , new_sample_config , self.graph.all_configs , int(math.log(i)))
                 for neigh_config,distance in neighbor_info:
                     if self.is_valid_edge(new_sample_config , neigh_config) and (new_sample_config != neigh_config).all():
                         self.graph.add_edge(new_sample_config.tobytes() , np.array(neigh_config).tobytes() , distance)

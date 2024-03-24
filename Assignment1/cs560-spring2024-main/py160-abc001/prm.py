@@ -17,7 +17,7 @@ class PRM():
         self.goal = np.array(goal)
         self.obstacles = self.read_obstacles(obstacles_file)
         self.graph = {}
-        self.max_nodes = 10
+        self.max_nodes = 500
         self.k_nearest = 6
         self.mra = ModifiedRoboticArm(self.viz_out)
         self.graph = Graph()
@@ -75,7 +75,7 @@ class PRM():
 
         for i in range(2, self.max_nodes):
             # sample the new configuration
-            if i%500 ==0 :
+            if i%200 ==0 :
                 print(i , end= ' ')
             flag = True
             while(flag):
@@ -117,7 +117,19 @@ class PRM():
         print("Path couldn't be found")
         return None
     
-    def visualize(self):
+    def visualize_path(self , final_path):
+        # first add small spheres and edges 
+            # code modified onto the mra.visualize_path function
+        # second visualization
+        if final_path:
+            robot_path = None
+            for i in range(1,len(final_path)):
+                if i == 1 :
+                    robot_path = np.linspace(final_path[i-1] , final_path[i] , num = 100)
+                else:
+                    robot_path = np.append(robot_path , np.linspace(final_path[i-1] , final_path[i] , num = 100) , axis= 0)
+            return self.mra.visualize_arm_path(None , None , robot_path , final_path)
+
         return
 
 if __name__ == "__main__":
@@ -132,12 +144,13 @@ if __name__ == "__main__":
     robot_type = args.robot
     start_config = args.start
     goal_config = args.goal
-    obstacles_file = args.map   
+    obstacles_file = args.map       
 
     # print(robot_type , start_config , goal_config, obstacles_file)
     prm = PRM(robot_type , start_config , goal_config, obstacles_file, viz_out)
     # print("PRM object instantiated")
     # print(prm.obstacles)
+
     is_direct = False  # can it move directly from the start state to goal state 
     prm.build_graph(is_direct)
     # print("Graph Nodes:")
@@ -148,5 +161,10 @@ if __name__ == "__main__":
         print(" Final Path :\n")
         for configuration in final_path:
             print(configuration)
+    
+    prm.visualize_path(final_path)
+    viz_out.to_html("prm_arm_solution.html", "out/")
+ 
+
 
     

@@ -1,6 +1,6 @@
 import numpy as np
 from geometry import * 
-from threejs_group import threejs_group as viz_group
+from threejs_group import threejs_group
 
 class RoboticArmTransformer:
     @staticmethod
@@ -30,8 +30,8 @@ class RoboticArmTransformer:
             [2*x*z - 2*y*w, 2*y*z + 2*x*w, 1 - 2*x*x - 2*y*y]])
 
 class ModifiedRoboticArm:
-    def __init__(self, visualization):
-        self.visualization = visualization
+    def __init__(self, viz_out):
+        self.viz_out = viz_out
         self.transformer = RoboticArmTransformer()
         self.box_info = {0 : { "name" : "base" , "size" : [2, 2, 0.5] , "color" : "0xFF0000"},
                     1 : { "name" : "link1" ,"size" : [1, 1, 4  ] , "color" : "0x000000"},
@@ -76,23 +76,21 @@ class ModifiedRoboticArm:
             path.append(interpolated_configuration)
         return path
 
-    def visualize_arms(self , configurations , viz_out):
-        # TODO: visualization is not working , giving a file error, CORRECT THE CODE
-        viz_output = viz_group(js_dir="../js")       
-        for configuration in configurations:
+    def visualize_arms(self , configurations):
+        # TODO: visualization is not working , giving a file error, CORRECT THE CODE    
+        for k ,configuration in enumerate(configurations):
             transformations = self.calculate_forward_kinematics(configuration)
             for i, transformation in enumerate(transformations):
                 position, quaternion = transformation
-                geom = box(self.box_info[i]["name"] , self.box_info[i]["size"][0] , self.box_info[i]["size"][1] ,self.box_info[i]["size"][2] , position , quaternion)
-                viz_output.add_obstacle(geom , self.box_info[i]["color"])
+                geom = box(self.box_info[i]["name"] + str(k) , self.box_info[i]["size"][0] , self.box_info[i]["size"][1] ,self.box_info[i]["size"][2] , position , quaternion)
+                self.viz_out.add_obstacle(geom , self.box_info[i]["color"])
+        return self.viz_out
+    
+    def visualize_arm_path(self, start_configuration, end_configuration , path , config_nodes):
         
-        viz_output.to_html("out\\nearest_neigbours_arm_configs.html")
-
-    def visualize_arm_path(self, start_configuration, end_configuration):
-        viz_output = viz_group(js_dir="../js")
-
-        path = self.calculate_arm_path(start_configuration, end_configuration)
-
+        if type(path) == int:
+            path = self.calculate_arm_path(start_configuration, end_configuration)
+        
         boxes = {
             'link0': box("base", 2, 2, 0.5, [0, 0, 0], self.transformer.rotate_z_quaternion(0)),
             'link1': box("link1", 1, 1, 4, [0, 0, 0], self.transformer.rotate_y_quaternion(0)),
@@ -103,13 +101,18 @@ class ModifiedRoboticArm:
             'link1': "0x000000",
             'link2': "0xFFFF00"
         }
-
+        link_colors_list = list(link_colors.values())
         keyframes = {name: [] for name in boxes}
-
+        sphere_counter = 0
         for t, configuration in enumerate(path):
             transformations = self.calculate_forward_kinematics(configuration)
             for i, transformation in enumerate(transformations):
                 position, quaternion = transformation
+                if config_nodes != None:
+                    if any(np.array_equal(np.array(configuration), item) for item in config_nodes): 
+                        geom = sphere('s'+str(sphere_counter) , 0.1 , position , [1,0,0,0] )
+                        self.viz_out.add_obstacle(geom , link_colors_list[i])
+                    sphere_counter += 1
                 keyframes[f'link{i}'].append({
                     'time': t,
                     'position': position,
@@ -118,9 +121,10 @@ class ModifiedRoboticArm:
 
         for name, keyframe_data in keyframes.items():
             animation_data = [(kf['time'], kf['position'], kf['quaternion'], link_colors[name]) for kf in keyframe_data]
-            viz_output.add_animation(boxes[name], animation_data)
+            self.viz_out.add_animation(boxes[name], animation_data)
 
-        viz_output.to_html("modified_robotic_arm_path.html", "out/")
+        return self.viz_out
+        
 
     def aabb_single_obstacle_collision_check(self , configuration , sphere_position , sphere_radius):
         # TODO : Yet to test the code
@@ -168,10 +172,13 @@ class ModifiedRoboticArm:
 
 
 if __name__ == "__main__":
-    modified_viz_output = viz_group(js_dir="../js")
+    modified_viz_output = threejs_group(js_dir="../js")
     modified_robotic_arm = ModifiedRoboticArm(modified_viz_output)
 
     initial_configuration = np.random.uniform(-np.pi, np.pi, 3)
     final_configuration = np.random.uniform(-np.pi, np.pi, 3)
+    modified_robotic_arm.visualize_arm_path(initial_configuration, final_configuration , -1 , None)
+    modified_viz_output.to_html("modified_robotic_arm_path1.html" , "out/")
 
-    modified_robotic_arm.visualize_arm_path(initial_configuration, final_configuration)
+#command to run : 
+# python .\py160-abc001\nearest_neighbors.py --robot arm --target 0 0 0 -k 3 --configs ".\py160-abc001\configs.txt"
