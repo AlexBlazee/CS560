@@ -1,0 +1,40 @@
+PS C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main> python ./py160-abc001/nearest_neighbors.py --robot arm --target 0 0 0 -k 3 --configs "./py160-abc001/configs.txt"           
+Reading Data from configs.txt
+Nearest 3 neighbors for target [0.0, 0.0, 0.0]:
+[0.2617993877991494, -0.7853981633974483, 1.0471975511965976]
+[0.5235987755982988, -1.0471960457462766, -1.3962366270320394]
+[-0.7853981633974483, -0.7853981633974483, -1.5707963267948966]
+==================
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\nearest_neigbours_arm_configs_1.html
+PS C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main> python ./py160-abc001/nearest_neighbors.py --robot arm --target -2.44 0.39 1.22 -k 3 --configs "./py160-abc001/configs.txt" 
+Reading Data from configs.txt
+Nearest 3 neighbors for target [-2.44, 0.39, 1.22]:
+[-2.3251930212387593, 0.7853973014934093, 1.571689041121639]
+[-2.96705972839036, 0.13089969389957473, 0.3926954276343695]
+[-2.0943951023931957, -1.0471975511965976, 1.5707963267948966]
+==================
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\nearest_neigbours_arm_configs_2.html
+PS C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main> python ./py160-abc001/nearest_neighbors.py --robot arm --target 1.047 -1.57 0.78 -k 3 --configs "./py160-abc001/configs.txt"                       
+Reading Data from configs.txt                                                                                       
+Nearest 3 neighbors for target [1.047, -1.57, 0.78]:
+[1.2217332790601985, -2.094393057773623, 0.6544996667318487]
+[1.0471975511965976, -2.0943951023931957, 1.5707963267948966]
+[0.2617993877991494, -0.7853981633974483, 1.0471975511965976]
+==================
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\nearest_neigbours_arm_configs_3.html
+PS C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main> python ./py160-abc001/nearest_neighbors.py --robot arm --target -1.22 2.09 1.57 -k 3 --configs "./py160-abc001/configs.txt"
+Reading Data from configs.txt
+Nearest 3 neighbors for target [-1.22, 2.09, 1.57]:
+[-1.0471975511965976, 1.5707963267948966, 1.0471975511965976]
+[-0.39269908169872414, 2.443460952792061, 0.26180724522767845]
+[-2.3251930212387593, 0.7853973014934093, 1.571689041121639]
+==================
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\nearest_neigbours_arm_configs_4.html
+PS C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main> python ./py160-abc001/nearest_neighbors.py --robot arm --target -0.39 -2.09 -2.09 -k 3 --configs "./py160-abc001/configs.txt"
+Reading Data from configs.txt
+Nearest 3 neighbors for target [-0.39, -2.09, -2.09]:
+[-0.7853981633974483, -0.7853981633974483, -1.5707963267948966]
+[0.5235987755982988, -1.0471960457462766, -1.3962366270320394]
+[-1.5707963267948966, -1.0471975511965976, -2.0943951023931957]
+==================
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\nearest_neigbours_arm_configs_5.html
