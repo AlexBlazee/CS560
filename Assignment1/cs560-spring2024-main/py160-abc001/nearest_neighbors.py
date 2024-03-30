@@ -36,7 +36,7 @@ class NearestNeighbour():
     def get_nearest_neighbors(self, robot, target, configs, k):
         distances = [(config, self.get_config_distance( robot , config, target)) for config in configs]
         sorted_distances = sorted(distances, key=lambda x: x[1])
-        return sorted_distances[:k+1]
+        return sorted_distances[:k]
     
     def get_prm_star_nearest_neighbors( self , robot , target , configs , k , radius , sample_count , gamma , d):
         distances = [[config, self.get_config_distance( robot , config, target)] for config in configs]
@@ -80,8 +80,12 @@ if __name__ == "__main__":
         print(neighbor)
     print("==================")
     nearestNeighbour.visulalize(neighbors , args.target)
-    viz_out.to_html("nearest_neigbours_arm_configs.html", "out/")
- 
+    # viz_out.to_html("nearest_neigbours_arm_configs_1.html", "out/") # 0 0 0
+    # viz_out.to_html("nearest_neigbours_arm_configs_2.html", "out/") # -2.44 0.39 1.22
+    # viz_out.to_html("nearest_neigbours_arm_configs_3.html", "out/") # 1.047 -1.57 0.78
+    # viz_out.to_html("nearest_neigbours_arm_configs_4.html", "out/") # -1.22 2.09 1.57
+    viz_out.to_html("nearest_neigbours_arm_configs_5.html", "out/") # -0.39 -2.09 -2.09
+
 
 # TODO:
 # 1. Describe briefly your implementation in the report.Make sure that you reason correctly regarding the topology of the robot’s configuration space 

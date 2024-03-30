@@ -90,6 +90,8 @@ class ModifiedRoboticArm:
         
         if type(path) == int:
             path = self.calculate_arm_path(start_configuration, end_configuration)
+        else:
+            path_line = [[],[],[]]
         
         boxes = {
             'link0': box("base", 2, 2, 0.5, [0, 0, 0], self.transformer.rotate_z_quaternion(0)),
@@ -111,6 +113,7 @@ class ModifiedRoboticArm:
                 if config_nodes != None:
                     if any(np.array_equal(np.array(configuration), item) for item in config_nodes): 
                         geom = sphere('s'+str(sphere_counter) , 0.1 , position , [1,0,0,0] )
+                        path_line[i].append(position)
                         self.viz_out.add_obstacle(geom , link_colors_list[i])
                     sphere_counter += 1
                 keyframes[f'link{i}'].append({
@@ -118,6 +121,11 @@ class ModifiedRoboticArm:
                     'position': position,
                     'quaternion': quaternion
                 })
+        if config_nodes != None:
+            self.viz_out.add_line(path_line[0] , link_colors_list[0] )
+            self.viz_out.add_line(path_line[1] , link_colors_list[1] )
+            self.viz_out.add_line(path_line[2] , link_colors_list[2] )
+
 
         for name, keyframe_data in keyframes.items():
             animation_data = [(kf['time'], kf['position'], kf['quaternion'], link_colors[name]) for kf in keyframe_data]

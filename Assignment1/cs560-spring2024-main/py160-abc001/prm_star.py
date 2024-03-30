@@ -4,22 +4,24 @@ import numpy as np
 from geometry import * 
 from threejs_group import *
 from prm import *
+import time
 
 class PRM_STAR(PRM):
-    def __init__(self, robot_type, start, goal, obstacles_file, viz_out) -> None:
-        super().__init__(robot_type, start, goal, obstacles_file, viz_out)
+    def __init__(self, robot_type, start, goal, max_nodes , obstacles_file, viz_out) -> None:
+        super().__init__(robot_type, start, goal, max_nodes, obstacles_file, viz_out)
         # if robot_type == 'arm':
         #     self.dim = 3
         # elif robot_type == 'vehicle':
         #     self.dim = 7
+       
 
     def build_graph(self , is_direct):
         self.graph.add_node(self.start.tobytes())
         self.graph.add_node(self.goal.tobytes())
 
         for i in range(2, self.max_nodes):
-            if i % 500 == 0:
-                print(i, end=' ')
+            if i % 100 == 0:
+                print(i)
             flag = True
             while flag:
                 new_sample_config = self.generate_random_config()
@@ -36,9 +38,10 @@ class PRM_STAR(PRM):
                 for neigh_config,distance in neighbor_info:
                     if self.is_valid_edge(new_sample_config , neigh_config) and (new_sample_config != neigh_config).all():
                         self.graph.add_edge(new_sample_config.tobytes() , np.array(neigh_config).tobytes() , distance)
-
+        return
 
 if __name__ == "__main__":
+    start_time = time.time()
     viz_out = threejs_group(js_dir="../js")
     parser = argparse.ArgumentParser()
     parser.add_argument("--robot", type= str , required=True, choices=["arm", "vehicle"])
@@ -51,16 +54,16 @@ if __name__ == "__main__":
     start_config = args.start
     goal_config = args.goal
     obstacles_file = args.map   
-
+    max_nodes = 5000
     # print(robot_type , start_config , goal_config, obstacles_file)
-    prm_star = PRM_STAR(robot_type , start_config , goal_config, obstacles_file, viz_out)
+    prm_star = PRM_STAR(robot_type , start_config , goal_config,  max_nodes , obstacles_file, viz_out)
     # print("PRM Star object instantiated")
     # print(prm_star.obstacles)
     is_direct = False  # can it move directly from the start state to goal state 
     prm_star.build_graph(is_direct)
     # print("Graph Nodes:")
     # prm_star.graph.print_node_info()
-    final_path = prm_star.search_path()
+    final_path = prm_star.search_path(is_heuristic= True) # A* implementation
 
     if final_path:
         print(" Final Path :\n")
@@ -68,3 +71,8 @@ if __name__ == "__main__":
             print(configuration)
 
     
+    prm_star.visualize_path(final_path)
+    # viz_out.to_html("prm_star_arm_solution_1.html", "out/")
+    viz_out.to_html("prm_star_arm_solution_2.html", "out/")
+    end_time =time.time()
+    print(f"The code took {end_time - start_time} seconds to execute.")

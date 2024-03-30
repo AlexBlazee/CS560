@@ -8,19 +8,21 @@ from nearest_neighbors import *
 from arm_2 import ModifiedRoboticArm
 from graph import *
 import heapq
+import time
 
 class PRM():
-    def __init__(self , robot_type , start , goal, obstacles_file, viz_out) -> None:
+    def __init__(self , robot_type , start , goal, max_nodes , obstacles_file, viz_out) -> None:
         self.viz_out = viz_out
         self.robot_type = robot_type
         self.start = np.array(start)
         self.goal = np.array(goal)
         self.obstacles = self.read_obstacles(obstacles_file)
+        self.visualize_obstacles()
         self.graph = {}
-        self.max_nodes = 500
+        self.max_nodes = max_nodes
         self.k_nearest = 6
         self.mra = ModifiedRoboticArm(self.viz_out)
-        self.graph = Graph()
+        self.graph = Graph(self.start , self.goal)
         self.nearest_neighbor = NearestNeighbour(self.viz_out)
         
     def read_obstacles(self, obstacle_file):
@@ -28,6 +30,13 @@ class PRM():
         with open(obstacle_file, 'r') as file:
             obstacles = [list(map(float, line.strip().split())) for line in file]
         return obstacles
+
+    def visualize_obstacles(self):
+        blue="0x0000ff"
+        for i,[x,y,z,r] in enumerate(self.obstacles):
+            geom = sphere('obs'+str(i) , r , [x,y,z] , [1,0,0,0] )
+            self.viz_out.add_obstacle(geom , blue)
+        return 
 
     def generate_random_config(self):
         if self.robot_type == 'arm':
@@ -70,13 +79,14 @@ class PRM():
 
 
     def build_graph(self , is_direct):
+        print("Building graph .....")
         self.graph.add_node(self.start.tobytes())
         self.graph.add_node(self.goal.tobytes())
 
         for i in range(2, self.max_nodes):
             # sample the new configuration
-            if i%200 ==0 :
-                print(i , end= ' ')
+            if i%100 == 0 :
+                print(i)
             flag = True
             while(flag):
                 new_sample_config = self.generate_random_config()
@@ -97,7 +107,8 @@ class PRM():
                 # find nearest neighbour configs
         return
 
-    def search_path(self):
+    def search_path(self , is_heuristic):
+        print("Searching Path .....")
         visited = set()
         queue = [(0 , self.start.tobytes() , [])]
         
@@ -112,7 +123,10 @@ class PRM():
             
             for neighbor,distance in self.graph.get_all_neighbors(current_node):
                 if neighbor not in visited:
-                    new_cost = cost + distance
+                    if is_heuristic == True:
+                        new_cost = cost + distance + self.graph.heuristic[neighbor]
+                    else:
+                        new_cost = cost + distance
                     heapq.heappush(queue , (new_cost , neighbor , path.copy()))
         print("Path couldn't be found")
         return None
@@ -133,6 +147,7 @@ class PRM():
         return
 
 if __name__ == "__main__":
+    start_time = time.time()
     viz_out = threejs_group(js_dir="../js")
     parser = argparse.ArgumentParser()
     parser.add_argument("--robot", type= str , required=True, choices=["arm", "vehicle"])
@@ -145,9 +160,9 @@ if __name__ == "__main__":
     start_config = args.start
     goal_config = args.goal
     obstacles_file = args.map       
-
+    max_nodes = 5000
     # print(robot_type , start_config , goal_config, obstacles_file)
-    prm = PRM(robot_type , start_config , goal_config, obstacles_file, viz_out)
+    prm = PRM(robot_type , start_config , goal_config, max_nodes , obstacles_file, viz_out)
     # print("PRM object instantiated")
     # print(prm.obstacles)
 
@@ -155,7 +170,7 @@ if __name__ == "__main__":
     prm.build_graph(is_direct)
     # print("Graph Nodes:")
     # prm.graph.print_node_info()
-    final_path = prm.search_path()
+    final_path = prm.search_path(is_heuristic= True )
 
     if final_path:
         print(" Final Path :\n")
@@ -163,8 +178,9 @@ if __name__ == "__main__":
             print(configuration)
     
     prm.visualize_path(final_path)
-    viz_out.to_html("prm_arm_solution.html", "out/")
- 
-
+    viz_out.to_html("prm_arm_solution_1.html", "out/")
+    # viz_out.to_html("prm_arm_solution_2.html", "out/")
+    end_time =time.time()
+    print(f"The code took {end_time - start_time} seconds to execute.")
 
     

@@ -1,14 +1,22 @@
 import numpy as np
 
 class Graph:
-    def __init__(self):
+    def __init__(self, start_state , goal_state):
         self.graph = {}
         self.all_configs = set()
+        self.start_state = start_state
+        self.goal_state = goal_state
+        self.heuristic = {}
+
+    def get_heuristic(self , node_val):
+        return np.linalg.norm( node_val - self.goal_state)
 
     def add_node(self, node):
         if node not in self.graph:
             self.graph[node] = []
-            self.all_configs.add(tuple(np.frombuffer(node)))
+            node_val = np.frombuffer(node)
+            self.all_configs.add(tuple(node_val))
+            self.heuristic[node] = self.get_heuristic(node_val)
 
     def add_edge(self, node1, node2, weight):
         self.add_node(node1)

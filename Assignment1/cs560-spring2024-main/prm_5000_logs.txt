@@ -1,0 +1,21 @@
+ Final Path :
+
+[0. 0. 0.]
+[0.26197185 0.06783544 0.98832054]
+[0.05601653 1.09336798 1.10827669]
+[0.15921605 1.55427258 1.82853545]
+[1.  1.5 2. ]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_arm_solution_2.html
+The code took 4668.398626804352 seconds to execute.
+PS C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main>
+
+
+[-2.  -2.5  0. ]
+[ 0.26836096 -2.07514034 -0.40144743]
+[-0.02702836 -0.90962346 -1.31933721]
+[-0.0336966  -0.30175138 -2.57197673]
+[-0.16962538  0.80278603 -2.5589348 ]
+[ 0.04254466  1.65117746 -2.98636353]
+[ 2.   1.5 -3. ]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_arm_solution_1.html
+The code took 5274.982233762741 seconds to execute.
