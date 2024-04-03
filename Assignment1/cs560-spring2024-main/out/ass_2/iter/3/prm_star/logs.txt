@@ -1,0 +1,159 @@
+Current Iteration : 0
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[0. 0. 0.]
+[-0.12953407  0.2561257  -0.71228266]
+[-0.58480477  0.01405703 -1.68197127]
+[-0.44261588  0.9937223  -1.54040407]
+[-0.29123752  0.9789525  -2.49047755]
+[-0.71502269  1.72310043 -2.86820524]
+[ 2.   1.5 -3. ]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_star_arm_solution_iter_0.html
+The code took 378.80912160873413 seconds to execute.
+Current Iteration : 1
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[0. 0. 0.]
+[-0.03840917  2.26814098 -1.58559946]
+[ 1.11375051  2.62300211 -2.64581646]
+[ 2.   1.5 -3. ]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_star_arm_solution_iter_1.html
+The code took 410.18520522117615 seconds to execute.
+Current Iteration : 2
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[0. 0. 0.]
+[-0.46572577  0.7678075  -1.42763551]
+[-0.01778308  2.15563475 -2.2192768 ]
+[ 0.75395704  2.98256896 -2.54653685]
+[ 1.79383314  2.58177355 -2.65775225]
+[ 2.   1.5 -3. ]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_star_arm_solution_iter_2.html
+The code took 369.07391571998596 seconds to execute.
+Current Iteration : 3
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[0. 0. 0.]
+[-0.6551391   0.31791591 -1.37511165]
+[-1.71355242  1.47528743 -1.57539126]
+[-0.39495147  2.84825423 -2.87486347]
+[ 1.05782621  2.85448074 -3.03528925]
+[ 2.   1.5 -3. ]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_star_arm_solution_iter_3.html
+The code took 427.04841232299805 seconds to execute.
+Current Iteration : 4
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[0. 0. 0.]
+[ 0.44311459 -0.01858817 -1.27419674]
+[-0.08652191 -0.11335536 -2.27386603]
+[-0.19238111  0.82652511 -2.35047742]
+[-0.77001592  0.71934482 -3.09903798]
+[ 0.1854612   1.85676986 -2.74641278]
+[ 1.02130052  2.10110942 -2.04794127]
+[ 1.6477989   2.7633674  -1.59292054]
+[ 2.31188897  2.68573724 -1.87254393]
+[ 2.24725532  2.02493267 -2.14482195]
+[ 1.97752751  2.30141176 -3.07837564]
+[ 2.   1.5 -3. ]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_star_arm_solution_iter_4.html
+The code took 361.79840874671936 seconds to execute.
+Current Iteration : 5
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[0. 0. 0.]
+[0.27247951 2.69988208 1.04459571]
+[ 1.24802695  3.02450084 -2.07309712]
+[ 2.   1.5 -3. ]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_star_arm_solution_iter_5.html
+The code took 362.7998983860016 seconds to execute.
+Current Iteration : 6
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[0. 0. 0.]
+[-1.41404462  0.41617186  0.37587258]
+[-1.56157929  2.91562342 -2.55274705]
+[ 2.   1.5 -3. ]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_star_arm_solution_iter_6.html
+The code took 368.00170707702637 seconds to execute.
+Current Iteration : 7
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[0. 0. 0.]
+[-2.49761627  1.81460993 -2.73399868]
+[ 2.   1.5 -3. ]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_star_arm_solution_iter_7.html
+The code took 365.25857496261597 seconds to execute.
+Current Iteration : 8
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[0. 0. 0.]
+[-0.87265433  0.42908484 -1.59263009]
+[-0.06890596  1.59804719 -2.76304358]
+[ 1.06580279  2.82017958 -2.25242909]
+[ 2.   1.5 -3. ]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_star_arm_solution_iter_8.html
+The code took 479.25595808029175 seconds to execute.
+Current Iteration : 9
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[0. 0. 0.]
+[ 0.20289779 -0.29246641 -1.1287729 ]
+[-0.01248073  0.39896824 -2.30444985]
+[-0.44384422  1.11145997 -1.99438511]
+[ 1.29004553  2.03282907 -2.34984317]
+[ 1.71012997  2.77849315 -2.4788355 ]
+[ 2.   1.5 -3. ]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_star_arm_solution_iter_9.html
+The code took 496.483505487442 seconds to execute.
+[378.80912160873413, 410.18520522117615, 369.07391571998596, 427.04841232299805, 361.79840874671936, 362.368.00170707702637, 365.25857496261597, 479.25595808029175, 496.483505487442]

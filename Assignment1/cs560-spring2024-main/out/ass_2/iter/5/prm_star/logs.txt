@@ -1,0 +1,145 @@
+1\prm_star.py --robot arm --start 1 1.5 2 --goal 0 0 0 --map ".\py160-abc001\arm_polygons.txt"
+Current Iteration : 0
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[1.  1.5 2. ]
+[0.71724009 2.10900869 1.19526386]
+[-0.41010048  2.42468849  0.50381316]
+[ 0.38833019  2.58039404 -0.88073206]
+[-0.78502033  1.78916747 -2.28426795]
+[-0.38694236  0.61633717 -1.46683975]
+[-0.51388067 -0.11810411 -0.65938825]
+[0. 0. 0.]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_star_arm_solution_iter_0.html
+The code took 434.0227892398834 seconds to execute.
+Current Iteration : 1
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[1.  1.5 2. ]
+[-0.20832391  1.29143673  1.41656776]
+[-0.04362363  0.83957652  0.65744405]
+[0.25035865 0.23616283 0.72267906]
+[0. 0. 0.]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_star_arm_solution_iter_1.html
+The code took 429.94479036331177 seconds to execute.
+Current Iteration : 2
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[1.  1.5 2. ]
+[0.01537138 2.89639758 2.41541247]
+[0. 0. 0.]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_star_arm_solution_iter_2.html
+The code took 402.44165444374084 seconds to execute.
+Current Iteration : 3
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[1.  1.5 2. ]
+[0.40675195 0.83842672 1.32815739]
+[0.57311204 0.44176787 0.37694452]
+[0. 0. 0.]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_star_arm_solution_iter_3.html
+The code took 31.11388921737671 seconds to execute.
+Current Iteration : 4
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[1.  1.5 2. ]
+[ 0.72183704  0.91965583 -1.06410128]
+[0. 0. 0.]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_star_arm_solution_iter_4.html
+The code took 31.73099970817566 seconds to execute.
+Current Iteration : 5
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[1.  1.5 2. ]
+[0.23209515 1.46638467 1.41537144]
+[-0.10624655  0.81325348  0.68528505]
+[0. 0. 0.]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_star_arm_solution_iter_5.html
+The code took 30.284990549087524 seconds to execute.
+Current Iteration : 6
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[1.  1.5 2. ]
+[-1.88171526 -0.30148581  0.13698472]
+[0. 0. 0.]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_star_arm_solution_iter_6.html
+The code took 30.33002996444702 seconds to execute.
+Current Iteration : 7
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[1.  1.5 2. ]
+[0.74058982 0.95466435 1.42977066]
+[0.51561174 0.32613768 0.78638512]
+[0. 0. 0.]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_star_arm_solution_iter_7.html
+The code took 30.269426822662354 seconds to execute.
+Current Iteration : 8
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[1.  1.5 2. ]
+[ 0.948935   -1.4046579   1.25410564]
+[0. 0. 0.]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_star_arm_solution_iter_8.html
+The code took 30.07317018508911 seconds to execute.
+Current Iteration : 9
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[1.  1.5 2. ]
+[0.87688693 0.90347896 1.67593055]
+[0.5966415  0.73842105 0.9535801 ]
+[0.08296994 0.2663727  1.02850846]
+[0. 0. 0.]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_star_arm_solution_iter_9.html
+The code took 29.965782403945923 seconds to execute.
+[434.0227892398834, 429.94479036331177, 402.44165444374084, 31.11388921737671, 31.73099970817566, 30.284990549087524, 30.33002996444702, 30.269426822662354, 30.07317018508911, 29.965782403945923]
+PS C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main>
