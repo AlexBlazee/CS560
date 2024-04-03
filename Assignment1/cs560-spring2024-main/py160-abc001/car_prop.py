@@ -44,7 +44,7 @@ class CarRobot:
             car_trajectory.append([t, [x,y,0.5] , quat , yellow ])
             line_trajectory.append([x,y,0.5])
 
-        cube = box("car", 2,2,1, car_trajectory[0][1], car_trajectory[0][2])
+        cube = box("car", 2,1,1, car_trajectory[0][1], car_trajectory[0][2])
         self.viz_out.add_animation(cube , car_trajectory)
         self.viz_out.add_line(line_trajectory , black)
         return self.viz_out
@@ -61,6 +61,8 @@ if __name__ == "__main__":
     q0 = np.array([0, 0, 0]) # initial configuration
     car_robot = CarRobot(q0 = q0 , viz_out= viz_out)
     car_robot.visualize_trajectory(np.array(control_vec))  
+    viz_out.to_html("forward_dynamic_car_path.html" , "out/")
+
     # viz_out.to_html("forward_dynamic_car_path_u_1_0.html" , "out/")
     # viz_out.to_html("forward_dynamic_car_path_u_1_1.html" , "out/")
-    viz_out.to_html("forward_dynamic_car_path_u_1_n1.html" , "out/")
+    viz_out.to_html("forward_dynamic_car_path_u_n1_n1.html" , "out/")
