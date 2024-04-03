@@ -1,0 +1,184 @@
+ing2024-main> python .\py160-abc001\prm.py --robot arm --start -2 -2.5 0 --goal 2.0 1.5 -3.0 --map ".\py160-abc001\arm_polygons.txt" 
+Current Iteration : 0
+Building graph .....
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[-2.  -2.5  0. ]
+[ 0.32067887 -1.10888337 -1.77174687]
+[ 0.06905901  0.49596991 -1.10897997]
+[-0.05801649  1.90147665 -1.5107084 ]
+[ 1.8334434   1.9602013  -1.97358004]
+[ 2.21757635  2.37728544 -2.61862977]
+[ 1.98476567  1.76554929 -2.9389156 ]
+[ 2.   1.5 -3. ]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_arm_solution_iter_0.html
+The code took 783.295393705368 seconds to execute.
+Current Iteration : 1
+Building graph .....
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[-2.  -2.5  0. ]
+[-0.45074119 -2.2723449  -2.21265562]
+[ 0.25998594 -1.03800982 -1.68312201]
+[ 0.05394451  0.3351845  -2.15098041]
+[ 0.0950946   1.90214008 -2.3811404 ]
+[-0.99986155  3.08315594 -2.30675883]
+[ 2.   1.5 -3. ]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_arm_solution_iter_1.html
+The code took 581.1903417110443 seconds to execute.
+Current Iteration : 2
+Building graph .....
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[-2.  -2.5  0. ]
+[ 1.6002679  -1.89899485 -1.13219231]
+[-0.1895848  -0.40199878 -1.97621159]
+[-0.04159613  0.64490058 -3.12343768]
+[-0.71361771  1.47802688 -2.64485456]
+[ 0.30939201  2.84719382 -2.95025548]
+[ 1.78762242  3.01287565 -3.09275823]
+[ 2.   1.5 -3. ]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_arm_solution_iter_2.html
+The code took 639.0626075267792 seconds to execute.
+Current Iteration : 3
+Building graph .....
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[-2.  -2.5  0. ]
+[ 1.47577303 -1.32947505 -0.94013533]
+[ 0.86371448 -0.48547643 -2.94249347]
+[-0.18568032  0.48977972 -2.13216471]
+[ 0.03365901  2.41702565 -2.82330947]
+[ 1.2025452   1.8974419  -2.98309853]
+[ 2.   1.5 -3. ]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_arm_solution_iter_3.html
+The code took 533.7954185009003 seconds to execute.
+Current Iteration : 4
+Building graph .....
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[-2.  -2.5  0. ]
+[-0.73918191 -1.72718006 -1.20084343]
+[ 1.27246612 -1.31350682 -1.85585008]
+[-0.31413736  0.57294952 -3.10266259]
+[ 0.48561974  2.65174155 -3.11913596]
+[ 2.   1.5 -3. ]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_arm_solution_iter_4.html
+The code took 806.5795388221741 seconds to execute.
+Current Iteration : 5
+Building graph .....
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[-2.  -2.5  0. ]
+[-0.5345672  -2.36228426 -1.556266  ]
+[ 0.03620146 -1.98364813 -2.43069501]
+[ 0.07604275 -1.15768038 -2.09522262]
+[ 0.12813525 -0.36766393 -1.84289139]
+[-0.20963363  0.93746721 -2.36746558]
+[ 0.63820498  2.99323861 -2.53639401]
+[ 2.   1.5 -3. ]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_arm_solution_iter_5.html
+The code took 562.3379282951355 seconds to execute.
+Current Iteration : 6
+Building graph .....
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[-2.  -2.5  0. ]
+[ 0.27895211 -1.24813798 -1.83936996]
+[ 0.12953805  0.16261409 -2.40975347]
+[-0.19246216  1.72001577 -2.56795304]
+[ 1.08520777  2.58400875 -2.30055679]
+[ 2.   1.5 -3. ]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_arm_solution_iter_6.html
+The code took 532.9296200275421 seconds to execute.
+Current Iteration : 7
+Building graph .....
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[-2.  -2.5  0. ]
+[ 2.9741007  -2.20140629 -0.87554991]
+[ 2.5899872  -1.06060969 -2.56288082]
+[ 2.87787217  0.13743745 -2.17891713]
+[ 3.13375962  1.12345899 -2.44148689]
+[ 2.51904584  2.56311135 -2.49871916]
+[ 2.   1.5 -3. ]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_arm_solution_iter_7.html
+The code took 485.75014066696167 seconds to execute.
+Current Iteration : 8
+Building graph .....
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[-2.  -2.5  0. ]
+[ 2.14326283 -3.00937021 -1.8996841 ]
+[ 2.65919207 -0.01792263 -2.16023759]
+[ 3.10155387  0.42450824 -2.63046562]
+[ 3.12727155  1.01094414 -2.87701386]
+[ 2.9920494   1.5991487  -2.84729377]
+[ 2.08864825  1.75819723 -2.77891929]
+[ 2.   1.5 -3. ]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_arm_solution_iter_8.html
+The code took 448.0795497894287 seconds to execute.
+Current Iteration : 9
+Building graph .....
+100
+200
+300
+400
+Searching Path .....
+ Final Path :
+
+[-2.  -2.5  0. ]
+[ 1.67158294 -1.36274382 -2.78482822]
+[ 2.41161167 -0.05934218 -2.51853109]
+[ 3.06524699  0.20891282 -2.6244138 ]
+[ 3.14025528  2.1041418  -2.91486175]
+[ 2.   1.5 -3. ]
+Output: C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main\out\prm_arm_solution_iter_9.html
+The code took 448.4867753982544 seconds to execute.
+[783.295393705368, 581.1903417110443, 639.0626075267792, 533.7954185009003, 806.5795388221741, 562.3379282951355, 532.9296200275421, 485.75014066696167, 448.0795497894287, 448.4867753982544]
+PS C:\Users\prade\OneDrive\Documents\GitHub\CS560\Assignment1\cs560-spring2024-main>
