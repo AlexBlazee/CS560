@@ -147,7 +147,7 @@ class PRM():
         return
 
 if __name__ == "__main__":
-    start_time = time.time()
+
     viz_out = threejs_group(js_dir="../js")
     parser = argparse.ArgumentParser()
     parser.add_argument("--robot", type= str , required=True, choices=["arm", "vehicle"])
@@ -160,27 +160,35 @@ if __name__ == "__main__":
     start_config = args.start
     goal_config = args.goal
     obstacles_file = args.map       
-    max_nodes = 5000
-    # print(robot_type , start_config , goal_config, obstacles_file)
-    prm = PRM(robot_type , start_config , goal_config, max_nodes , obstacles_file, viz_out)
-    # print("PRM object instantiated")
-    # print(prm.obstacles)
+    max_nodes = 500
+    num_iterations = 10
+    time_per_iteration   = []
+    for i in range(num_iterations):
+        start_time = time.time()
+        print("Current Iteration :", i)
+        # print(robot_type , start_config , goal_config, obstacles_file)
+        viz_out = threejs_group(js_dir="../js")
+        # print(robot_type , start_config , goal_config, obstacles_file)
+        prm = PRM(robot_type , start_config , goal_config, max_nodes , obstacles_file, viz_out)
+        # print("PRM object instantiated")
+        # print(prm.obstacles)
 
-    is_direct = False  # can it move directly from the start state to goal state 
-    prm.build_graph(is_direct)
-    # print("Graph Nodes:")
-    # prm.graph.print_node_info()
-    final_path = prm.search_path(is_heuristic= True )
+        is_direct = False  # can it move directly from the start state to goal state 
+        prm.build_graph(is_direct)
+        # print("Graph Nodes:")
+        # prm.graph.print_node_info()
+        final_path = prm.search_path(is_heuristic= True )
 
-    if final_path:
-        print(" Final Path :\n")
-        for configuration in final_path:
-            print(configuration)
-    
-    prm.visualize_path(final_path)
-    viz_out.to_html("prm_arm_solution_1.html", "out/")
-    # viz_out.to_html("prm_arm_solution_2.html", "out/")
-    end_time =time.time()
-    print(f"The code took {end_time - start_time} seconds to execute.")
+        if final_path:
+            print(" Final Path :\n")
+            for configuration in final_path:
+                print(configuration)
+        
+        prm.visualize_path(final_path)
+        viz_out.to_html(f"prm_arm_solution_iter_{i}.html", "out/")
+        # viz_out.to_html("prm_arm_solution_2.html", "out/")
+        end_time =time.time()
+        time_per_iteration.append(end_time - start_time)
+        print(f"The code took {end_time - start_time} seconds to execute.")
 
-    
+    print(time_per_iteration)
