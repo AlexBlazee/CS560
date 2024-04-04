@@ -42,22 +42,70 @@ class PRM():
         if self.robot_type == 'arm':
             return np.random.uniform(-np.pi, np.pi, 3)
         elif self.robot_type == 'vehicle':
-            # TODO : implement vehicle initialization
-            print(" This part is not initialized yet")
-            return -1
+            x = np.random.uniform(-50, 50)
+            y = np.random.uniform(-50, 50)
+            z = np.random.uniform(-50, 50)
+            qw = np.random.uniform(-1, 1)
+            qx = np.random.uniform(-1, 1)
+            qy = np.random.uniform(-1, 1)
+            qz = np.random.uniform(-1, 1)
+            norm = np.sqrt(qw**2 + qx**2 + qy**2 + qz**2)
+            qw /= norm
+            qx /= norm
+            qy /= norm
+            qz /= norm
+            return np.array([x, y, z, qw, qx, qy, qz])
 
-    def is_valid_edge(self, config1, config2):        
-        path = self.mra.calculate_arm_path_without_collision(config1 , config2 , self.obstacles)
-        if path == -1:
-            return False 
-        return path,True
-    
-    def is_valid_node(self , config ):
-        if self.mra.aabb_env_obstacle_collision_check(config , self.obstacles) == False:
-            return True # no collision
-        else:
+    def is_valid_edge(self, config1, config2):
+        if self.robot_type == "arm":                
+            path = self.mra.calculate_arm_path_without_collision(config1 , config2 , self.obstacles)
+            if path == -1:
+                return False 
+            return path,True
+        if self.robot_type == "vehicle":
+            return [],True  #Manually set to block  the run
+
+    def is_collision_free_check(self, car_state , sphere_position , sphere_radius):
+        r = sphere_radius
+        s_x,s_y,s_z = np.array(sphere_position)
+        c_x,c_y,c_z = car_state[:3]
+        lx,ly,lz = np.array([2,1,1])/2
+        local_vertices = np.array([[-lx,-ly,-ly],[lx,-ly,-lz],[-lx,ly,-lz],[lx,ly,-lz],[-lx,-ly,lz],[lx,-ly,lz],[-lx,ly,lz],[lx,ly,lz]])
+        rotation_matrix = self.car_robot.quaternion_to_matrix(car_state[3:])
+        transformed_points = np.dot(rotation_matrix, local_vertices.T)
+        x_min,y_min,z_min = np.min(transformed_points , axis = 1) + np.array([c_x,c_y,c_z])
+        x_max,y_max,z_max = np.max(transformed_points , axis = 1) + np.array([c_x,c_y,c_z])
+        # get box closest point to sphere center by clamping
+        X = max(x_min , min(s_x , x_max))
+        Y = max(y_min , min(s_y , y_max))
+        Z = max(z_min , min(s_z , z_max))
+        distance  = np.sqrt((X - s_x)*(X - s_x)  + (Y - s_y)*(Y - s_y) + (Z - s_z)*(Z - s_z))
+
+        if distance > r :
             return False
+        else:
+            return True
         
+    def obstacle_collision_check(self , car_state ):
+        for obstacle in self.obstacles:
+            sphere_position = np.array(obstacle[:3])
+            sphere_radius = obstacle[3]
+            if self.is_collision_free_check( car_state , sphere_position , sphere_radius):
+                return True
+        return False    
+
+    def is_valid_node(self , config ):
+        if self.robot_type == "arm":
+            if self.mra.aabb_env_obstacle_collision_check(config , self.obstacles) == False:
+                return True # no collision
+            else:
+                return False
+        if self.robot_type == "vehicle":
+            if self.obstacle_collision_check(config ) == False:
+                return True
+            else:
+                return False
+
     def connect_initial_nodes(self , is_direct = True):
         node_list = [np.array(x) for x  in self.graph.get_nodes()]
         
@@ -76,7 +124,6 @@ class PRM():
         # print("----------------------------")
 
         return
-
 
     def build_graph(self , is_direct):
         print("Building graph .....")

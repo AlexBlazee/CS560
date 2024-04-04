@@ -5,6 +5,7 @@ from geometry import *
 from threejs_group import *
 from arm_2 import *
 import math
+import random 
 
 class NearestNeighbour():
     def __init__(self , viz_out) -> None:
@@ -29,8 +30,11 @@ class NearestNeighbour():
         if robot == "arm":
             distance = np.linalg.norm(np.array(config_1) - np.array(config_2))
         if robot == "vehicle":
-            print("Distance function is not yet Created")
-            distance = None
+            x1, y1, z1, qw1, qx1, qy1, qz1 = config_1
+            x2, y2, z2, qw2, qx2, qy2, qz2 = config_2
+            position_distance = np.sqrt((x1 - x2)**2 + (y1 - y2)**2 + (z1 - z2)**2)
+            orientation_distance = 2 * np.arccos(np.abs(qw1 * qw2 + qx1 * qx2 + qy1 * qy2 + qz1 * qz2))
+            distance = position_distance + orientation_distance
         return distance
 
     def get_nearest_neighbors(self, robot, target, configs, k):
@@ -45,27 +49,39 @@ class NearestNeighbour():
         neighbor_list = [sublist for sublist in sorted_distances if sublist[1] <= radius]
         return neighbor_list
 
+    def visualize_vehicle(self,configs):
+       
+        for i,config in enumerate(configs):
+            pos = config[:3]
+            quat = config[3:]
+            cube = box("car" + str(i), 2,1,1, pos , quat)
+            rand_color = str(hex(random.randrange(0,2**24)))
+            self.viz_out.add_obstacle(cube, rand_color)
+        return self.viz_out          
 
-    def visulalize(self , nearest_configs , target ):
+    def visulalize(self , nearest_configs , robot,   target ):
         list_of_configs = nearest_configs
         list_of_configs.append(target)
-        modified_robotic_arm = ModifiedRoboticArm(self.viz_out)
-        return modified_robotic_arm.visualize_arms(list_of_configs)
+        if robot == "arm":
+            modified_robotic_arm = ModifiedRoboticArm(self.viz_out)
+            return modified_robotic_arm.visualize_arms(list_of_configs)
+        if robot == "vehicle":
+            return self.visualize_vehicle(list_of_configs)
 
 if __name__ == "__main__":
 
     CREATE_CONFIG = False
-    CONFIG_FILE_NAME = "configs.txt"
+    ARM_CONFIG_FILE_NAME = "configs.txt"
     # creating configs.txt file with configurations ONLY FOR ARMS
     if CREATE_CONFIG == True:
         NUM_RANDOM_CONFIGS = 10
-        with open(CONFIG_FILE_NAME , "w" ) as file:
+        with open(ARM_CONFIG_FILE_NAME , "w" ) as file:
             for i in range(NUM_RANDOM_CONFIGS):
                 confs = np.random.uniform(-np.pi, np.pi, 3)
                 line = ' '.join(str(conf) for conf in confs) + '\n'
                 file.write(line)
     else:
-        print(f"Reading Data from {CONFIG_FILE_NAME}")
+        print(f"Reading Data from {ARM_CONFIG_FILE_NAME}")
 
     viz_out = threejs_group(js_dir="../js")
     nearestNeighbour = NearestNeighbour(viz_out)
@@ -79,14 +95,18 @@ if __name__ == "__main__":
         neighbors.append(neighbor)
         print(neighbor)
     print("==================")
-    nearestNeighbour.visulalize(neighbors , args.target)
+    nearestNeighbour.visulalize(neighbors ,args.robot , args.target)
     # viz_out.to_html("nearest_neigbours_arm_configs_1.html", "out/") # 0 0 0
     # viz_out.to_html("nearest_neigbours_arm_configs_2.html", "out/") # -2.44 0.39 1.22
     # viz_out.to_html("nearest_neigbours_arm_configs_3.html", "out/") # 1.047 -1.57 0.78
     # viz_out.to_html("nearest_neigbours_arm_configs_4.html", "out/") # -1.22 2.09 1.57
-    viz_out.to_html("nearest_neigbours_arm_configs_5.html", "out/") # -0.39 -2.09 -2.09
+    # viz_out.to_html("nearest_neigbours_arm_configs_5.html", "out/") # -0.39 -2.09 -2.09
 
-
+#    viz_out.to_html("nearest_neigbours_cube_configs_1.html", "out/") # 0 0 0
+    # viz_out.to_html("nearest_neigbours_cube_configs_2.html", "out/") # -2.44 0.39 1.22
+    # viz_out.to_html("nearest_neigbours_cube_configs_3.html", "out/") # 1.047 -1.57 0.78
+    # viz_out.to_html("nearest_neigbours_cube_configs_4.html", "out/") # -1.22 2.09 1.57
+    viz_out.to_html("nearest_neigbours_cube_configs_5.html", "out/") # -0.39 -2.09 -2.09
 # TODO:
 # 1. Describe briefly your implementation in the report.Make sure that you reason correctly regarding the topology of the robot’s configuration space 
 #        and define accordingly the distance metric between pairs of configurations
