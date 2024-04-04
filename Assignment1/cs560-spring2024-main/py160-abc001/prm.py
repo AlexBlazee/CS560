@@ -63,7 +63,18 @@ class PRM():
                 return False 
             return path,True
         if self.robot_type == "vehicle":
-            return [],True  #Manually set to block  the run
+            step = (np.array(config2) - np.array(config1))/100
+            for i in range(5):
+                x,y,z,qw,qx,qy,qz  = config1 + step
+                norm = np.sqrt(qw**2 + qx**2 + qy**2 + qz**2)
+                qw /= norm
+                qx /= norm
+                qy /= norm
+                qz /= norm
+                if self.obstacle_collision_check([x,y,z,qw,qx,qy,qz]):
+                    return True
+            return False 
+           
 
     def is_collision_free_check(self, car_state , sphere_position , sphere_radius):
         r = sphere_radius
@@ -182,16 +193,19 @@ class PRM():
         # first add small spheres and edges 
             # code modified onto the mra.visualize_path function
         # second visualization
-        if final_path:
-            robot_path = None
-            for i in range(1,len(final_path)):
-                if i == 1 :
-                    robot_path = np.linspace(final_path[i-1] , final_path[i] , num = 100)
-                else:
-                    robot_path = np.append(robot_path , np.linspace(final_path[i-1] , final_path[i] , num = 100) , axis= 0)
-            return self.mra.visualize_arm_path(None , None , robot_path , final_path)
+        if self.robot_type == "arm":
+            if final_path:
+                robot_path = None
+                for i in range(1,len(final_path)):
+                    if i == 1 :
+                        robot_path = np.linspace(final_path[i-1] , final_path[i] , num = 100)
+                    else:
+                        robot_path = np.append(robot_path , np.linspace(final_path[i-1] , final_path[i] , num = 100) , axis= 0)
+                return self.mra.visualize_arm_path(None , None , robot_path , final_path)
 
-        return
+            return
+        if self.robot_type == "vehicle":
+            return
 
 if __name__ == "__main__":
 
