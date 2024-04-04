@@ -43,7 +43,7 @@ class RRTPlanner:
         phi = np.arctan2(dy, dx) - near[2]
         if phi >1: phi = 1
         elif phi < -1 : phi = -1
-        print( "The pi value is :", phi)
+        # print( "The pi value is :", phi)
         return np.array([v, phi])
 
     def choose_random_control(self):
@@ -102,7 +102,7 @@ class RRTPlanner:
         else:
             return False        
 
-    def rrt(self, max_iterations=100):
+    def rrt(self, max_iterations= 500):
         for i in range(max_iterations):
             if i % 100 == 0:
                 print(i)
@@ -112,9 +112,9 @@ class RRTPlanner:
                 if self.is_valid_node(rand_state) and tuple(rand_state) not in self.tree.list_nodes:
                     flag_1 = False
                     break
-            print(" rand_state",rand_state ,end= ' ')
+            # print(" rand_state",rand_state ,end= ' ')
             nearest_state = self.nearest(list(self.tree.list_nodes.keys()), rand_state)
-            print(" nearest_state",nearest_state ,end= ' ')
+            # print(" nearest_state",nearest_state ,end= ' ')
             flag_2 = True
             while flag_2:
                 # control = self.choose_control()
@@ -123,15 +123,16 @@ class RRTPlanner:
                 trajectory = self.calculate_car_path_without_collision( control , nearest_state , duration)
                 if type(trajectory) != int:
                     flag_2 = False
+                    # print("internal trajectory" , trajectory)
                     self.tree.add_child(self.tree.list_nodes[nearest_state] , tuple(control) , trajectory)
-                    print(" control , duration , trajectory[-1]", control , duration , trajectory[-1])
+                    # print(" control , duration , trajectory[-1]", control , duration , trajectory[-1])
                     break
             if self.is_goal_region(trajectory[-1]):
-                print("goal region reached")
+                # print("goal region reached")
                 return self.tree.get_path_to_goal(trajectory[-1])
             
         nearest_state = self.nearest(list(self.tree.list_nodes.keys()), self.goal)
-        print("goal region could not be reached")    
+        # print("goal region could not be reached but the path till the neaest point is:")    
         return self.tree.get_path_to_goal(nearest_state)
 
     def get_visual_trajectory(self,tree_path):
@@ -143,6 +144,14 @@ class RRTPlanner:
         self.car_robot.visualize_given_trajectory(complete_path)       
         return complete_path
 
+    def get_tree_visualization(self):
+        black = "0x000000"
+        all_connections = list(self.tree.branch_configs.values())
+        for i,x in enumerate(all_connections):
+            x[:,2] = 0.5
+            all_connections[i] = x.tolist()
+        for i in range(len(all_connections)):
+            self.viz_out.add_line(all_connections[i] , black)
 
 if __name__ == "__main__":
     viz_out = threejs_group(js_dir="../js")
@@ -160,14 +169,15 @@ if __name__ == "__main__":
     planner = RRTPlanner( viz_out ,start, goal, obstacles_file)
     tree_path = planner.rrt()
 
-    print(tree_path)
+    # print(tree_path)
 
     if tree_path is not None:
-        trajectory = planner.get_visual_trajectory(tree_path)
+        complete_final_path = planner.get_visual_trajectory(tree_path)
         geom = sphere("sphere_0", 1, [start[0] , start[1] , 0.5], [1,0,0,0])
         geom1 = sphere("sphere_1", 1, [goal[0] , goal[1] , 0.5], [1,0,0,0])
         viz_out.add_obstacle(geom, green)
         viz_out.add_obstacle(geom1, red)
+        planner.get_tree_visualization()
         viz_out.to_html("rrt_path.html" , "out/")
     else:
         print("No path found.")
