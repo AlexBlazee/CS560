@@ -86,8 +86,8 @@ if __name__ == "__main__":
     q0 = np.array([0, 0, 0]) # initial configuration
     car_robot = CarRobot(q0 = q0 , viz_out= viz_out)
     car_robot.visualize_trajectory(np.array(control_vec) , q0)  
-    viz_out.to_html("forward_dynamic_car_path.html" , "out/")
+    # viz_out.to_html("forward_dynamic_car_path.html" , "out/")
 
     # viz_out.to_html("forward_dynamic_car_path_u_1_0.html" , "out/")
     # viz_out.to_html("forward_dynamic_car_path_u_1_1.html" , "out/")
-    # viz_out.to_html("forward_dynamic_car_path_u_n1_n1.html" , "out/")
+    viz_out.to_html("forward_dynamic_car_path_u_n1_n1.html" , "out/")

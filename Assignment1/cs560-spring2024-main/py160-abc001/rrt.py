@@ -14,6 +14,7 @@ class RRTPlanner:
         self.start = start
         self.goal = goal
         self.obstacles = self.read_obstacles(obstacles_file)
+        self.visualize_obstacles()
         self.tree = Tree(tuple(start))
         self.goal_threshold_trans = 0.1
         self.goal_threshold_rot = 0.5
@@ -30,7 +31,14 @@ class RRTPlanner:
         y = np.random.uniform(-50,50)
         theta = np.random.uniform(-np.pi, np.pi)
         return np.array([x, y, theta])
-    
+
+    def visualize_obstacles(self):
+        blue="0x0000ff"
+        for i,[x,y,z,r] in enumerate(self.obstacles):
+            geom = sphere('obs'+str(i) , r , [x,y,z] , [1,0,0,0] )
+            self.viz_out.add_obstacle(geom , blue)
+        return 
+
     def nearest(self, tree_nodes, state): ## update the function
         distances = [euclidean(state, node) for node in tree_nodes]
         return tree_nodes[np.argmin(distances)]
@@ -102,7 +110,7 @@ class RRTPlanner:
         else:
             return False        
 
-    def rrt(self, max_iterations= 500):
+    def rrt(self, max_iterations= 5000):
         for i in range(max_iterations):
             if i % 100 == 0:
                 print(i)
@@ -117,8 +125,8 @@ class RRTPlanner:
             # print(" nearest_state",nearest_state ,end= ' ')
             flag_2 = True
             while flag_2:
-                # control = self.choose_control()
-                control = self.choose_guided_control(nearest_state , rand_state)
+                control = self.choose_random_control()
+                # control = self.choose_guided_control(nearest_state , rand_state)
                 duration = np.random.randint(1,7)
                 trajectory = self.calculate_car_path_without_collision( control , nearest_state , duration)
                 if type(trajectory) != int:
