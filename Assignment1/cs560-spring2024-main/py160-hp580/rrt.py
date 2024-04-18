@@ -169,11 +169,11 @@ class RRTPlanner:
             landmarks = np.random.uniform(low=[x_range[0], y_range[0]], high=[x_range[1], y_range[1]], size=(count, 2))
             filename = f"landmark_{i}.txt"
             np.savetxt(filename, landmarks, fmt='%.2f', header=f"{count} 2", comments='')
-
+    
     def visualize_landmark(self , file_name):
         grey="#808080"
-        landmarks = np.loadtxt(file_name , skiprows=1)
-        for i,landmark in enumerate(landmarks):
+        self.landmarks = np.loadtxt(file_name , skiprows=1)
+        for i,landmark in enumerate(self.landmarks):
             x,y = landmark
             geom = sphere('lm'+str(i) , 1 , [x,y,0] , [1,0,0,0] )
             self.viz_out.add_obstacle(geom , grey)
@@ -191,8 +191,11 @@ if __name__ == "__main__":
     start = np.array(args.start)
     goal = np.array(args.goal)
     obstacles_file = args.map   
+
+    LANDMARK_FILE_NAME = 'landmark_0.txt'
     
     planner = RRTPlanner( viz_out ,start, goal, obstacles_file)
+    planner.visualize_landmark(LANDMARK_FILE_NAME)
     tree_path = planner.rrt()
 
     # print(tree_path)
