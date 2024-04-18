@@ -161,6 +161,24 @@ class RRTPlanner:
         for i in range(len(all_connections)):
             self.viz_out.add_line(all_connections[i] , black)
 
+    def landmark_creation(self):
+        landmark_counts = [5, 5, 8, 12, 12]
+        x_range = (-50, 50)
+        y_range = (-50, 50)
+        for i, count in enumerate(landmark_counts):
+            landmarks = np.random.uniform(low=[x_range[0], y_range[0]], high=[x_range[1], y_range[1]], size=(count, 2))
+            filename = f"landmark_{i}.txt"
+            np.savetxt(filename, landmarks, fmt='%.2f', header=f"{count} 2", comments='')
+
+    def visualize_landmark(self , file_name):
+        grey="#808080"
+        landmarks = np.loadtxt(file_name , skiprows=1)
+        for i,landmark in enumerate(landmarks):
+            x,y = landmark
+            geom = sphere('lm'+str(i) , 1 , [x,y,0] , [1,0,0,0] )
+            self.viz_out.add_obstacle(geom , grey)
+        return
+
 if __name__ == "__main__":
     viz_out = threejs_group(js_dir="../js")
     parser = argparse.ArgumentParser()
