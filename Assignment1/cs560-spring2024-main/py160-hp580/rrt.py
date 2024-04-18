@@ -143,14 +143,22 @@ class RRTPlanner:
         # print("goal region could not be reached but the path till the neaest point is:")    
         return self.tree.get_path_to_goal(nearest_state)
 
-    def get_visual_trajectory(self,tree_path):
+    # def get_visual_trajectory(self,tree_path):
+    #     path , actions = tree_path
+    #     complete_path = []
+    #     for i in range(1,len(path)):
+    #         complete_path.extend(self.tree.branch_configs[tuple([path[i-1] , path[i]])])
+       
+    #     self.car_robot.visualize_given_trajectory(complete_path)       
+    #     return complete_path
+    
+    def get_complete_trajectory(self,tree_path):
         path , actions = tree_path
         complete_path = []
         for i in range(1,len(path)):
             complete_path.extend(self.tree.branch_configs[tuple([path[i-1] , path[i]])])
-       
-        self.car_robot.visualize_given_trajectory(complete_path)       
         return complete_path
+
 
     def get_tree_visualization(self):
         black = "0x000000"
@@ -201,7 +209,9 @@ if __name__ == "__main__":
     # print(tree_path)
 
     if tree_path is not None:
-        complete_final_path = planner.get_visual_trajectory(tree_path)
+        # complete_final_path = planner.get_visual_trajectory(tree_path)
+        complete_final_path = planner.get_complete_trajectory(tree_path)
+        planner.car_robot.visualize_given_trajectory(complete_final_path)       
         geom = sphere("sphere_0", 1, [start[0] , start[1] , 0.5], [1,0,0,0])
         geom1 = sphere("sphere_1", 1, [goal[0] , goal[1] , 0.5], [1,0,0,0])
         viz_out.add_obstacle(geom, green)
