@@ -9,16 +9,15 @@ from car_prop import CarRobot
 from tree import Tree,TreeNode
 
 class RRTPlanner:
-    def __init__(self, viz_out,  start, goal, obstacles_file):
+    def __init__(self, viz_out,  start, goal, obstacles_file , actuation_noise, odometry_noise , observation_noise):
         self.viz_out = viz_out
         self.start = start
         self.goal = goal
         self.obstacles = self.read_obstacles(obstacles_file)
-        self.visualize_obstacles()
         self.tree = Tree(tuple(start))
         self.goal_threshold_trans = 0.1
         self.goal_threshold_rot = 0.5
-        self.car_robot = CarRobot( self.start , self.viz_out)
+        self.car_robot = CarRobot( self.start ,actuation_noise, odometry_noise , observation_noise, self.viz_out)
 
     def read_obstacles(self, obstacle_file):
         obstacles = []
@@ -89,7 +88,7 @@ class RRTPlanner:
         return False    
 
     def calculate_car_path_without_collision(self, car_controls, start_config , duration ):
-        trajectory = self.car_robot.simulate_trajectory( car_controls , start_config , duration)
+        trajectory,_,_,_ = self.car_robot.simulate_trajectory( car_controls , start_config , duration)
         for car_state in trajectory:
             if self.obstacle_collision_check(car_state) == True:
                 return -1
@@ -132,7 +131,7 @@ class RRTPlanner:
                 if type(trajectory) != int:
                     flag_2 = False
                     # print("internal trajectory" , trajectory)
-                    self.tree.add_child(self.tree.list_nodes[nearest_state] , tuple(control) , trajectory)
+                    self.tree.add_child(self.tree.list_nodes[nearest_state] , tuple([control, duration]) , trajectory)
                     # print(" control , duration , trajectory[-1]", control , duration , trajectory[-1])
                     break
             if self.is_goal_region(trajectory[-1]):
@@ -203,6 +202,7 @@ if __name__ == "__main__":
     LANDMARK_FILE_NAME = 'landmark_0.txt'
     
     planner = RRTPlanner( viz_out ,start, goal, obstacles_file)
+    planner.visualize_obstacles()
     planner.visualize_landmark(LANDMARK_FILE_NAME)
     tree_path = planner.rrt()
 
