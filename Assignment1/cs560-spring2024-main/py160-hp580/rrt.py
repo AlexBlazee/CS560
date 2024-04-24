@@ -131,7 +131,7 @@ class RRTPlanner:
                 if type(trajectory) != int:
                     flag_2 = False
                     # print("internal trajectory" , trajectory)
-                    self.tree.add_child(self.tree.list_nodes[nearest_state] , tuple([control, duration]) , trajectory)
+                    self.tree.add_child(self.tree.list_nodes[nearest_state], tuple([tuple(control), duration]), trajectory)  
                     # print(" control , duration , trajectory[-1]", control , duration , trajectory[-1])
                     break
             if self.is_goal_region(trajectory[-1]):

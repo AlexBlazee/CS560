@@ -7,7 +7,7 @@ class TreeNode:
 
     def add_child(self, action , child_config ):
         child = TreeNode(child_config , self , action )
-        self.children[action] = child
+        self.children[tuple(action)] = child  
         return child
       
     def print_config(self):
