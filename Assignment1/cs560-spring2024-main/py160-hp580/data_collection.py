@@ -5,28 +5,23 @@ import argparse
 from car_prop import CarRobot
 from rrt import RRTPlanner
 import os 
+from geometry import * 
 
 class DataCollection:
-    def __init__(self,viz_out, start, goal, obstacles_file):
+    def __init__(self,viz_out, start, goal, map_file):
         self.viz_out = viz_out
         self.start = start
         self.goal = goal
-        self.obstacles = self.read_obstacles(obstacles_file)
+        self.landmarks = self.load_landmarks(map_file)
     
     def load_landmarks(self, landmarks_file):  
         with open(landmarks_file, 'r') as file:  
             landmarks = [list(map(float, line.strip().split())) for line in file]  
         return landmarks  
 
-
-    def read_obstacles(self, obstacles_file):  
-        # Read the obstacles data from the file and return it as a numpy array  
-        obstacles = np.loadtxt(obstacles_file)  
-        return obstacles  
-
     def write_data_to_files(self, problem , noise , planned_actions , trajectory_data , actuation_data , odometry_data , landmark_data):
         # planner returned actions
-        data_directory = os.path.abspath("./data/")  
+        data_directory = os.path.abspath("./py160-hp580/data/")  
         if not os.path.exists(data_directory):  
             os.makedirs(data_directory)
         with open(os.path.join(data_directory, f"plan_{problem}_{noise}.txt"), "w") as plan_file:  
@@ -53,6 +48,13 @@ class DataCollection:
                 line = " ".join(map(str, exe_control))
                 ac_file.write( line + "\n")       
 
+    def visualize_landmarks(self):
+        blue="0x0000ff"
+        for i,[x,y] in enumerate(self.landmarks):
+            geom = sphere('obs'+str(i) , 0.5 , [x,y,0.5] , [1,0,0,0] )
+            self.viz_out.add_obstacle(geom , blue)
+        return 
+
 if __name__ == "__main__":
     viz_out = threejs_group(js_dir="../js")
     parser = argparse.ArgumentParser()
@@ -61,49 +63,46 @@ if __name__ == "__main__":
     parser.add_argument("--noise" , type=str , required= True , choices=['H','L','None'])
     args = parser.parse_args()
         
-    obstacles_file = "maps/map.txt" # may change based on the problem
-    start = [5 , 25, 0.5] # may change based on the problem
-    goal = [17, 15, 0.5] # may change based on the problem
+    map_file = args.map # landmark file
+    start = [5 , 25, 0.5] #  random start 
+    goal = [0, -25, 0.5] # random end
 
-    data_collection = DataCollection(viz_out, start, goal, obstacles_file)  
-
-
+    data_collection = DataCollection(viz_out, start, goal, map_file )  
+    data_collection.visualize_landmarks()
     actuation_noise_model = {'H': [0.3 , 0.2] , 'L' : [0.1 , 0.05] , 'None': None}  # v,phi  
     odometry_noise_model = {'H': [0.15 , 0.1] , 'L' : [0.05 , 0.03] , 'None': None} # v,phi  
     observation_noise_model = {'H': [0.5 , 0.25] , 'L' : [0.1 , 0.1] , 'None': None} # d, alpha  
-
-    LANDMARK_FILE_NAME = 'landmark_0.txt'  
-    land_mark_pos = data_collection.load_landmarks(LANDMARK_FILE_NAME) # load land_mark data
-
-    for _ in range(2):        
-        # planning 
-        planner = RRTPlanner( viz_out ,start, goal, obstacles_file , None , None , None)
-        tree_path = planner.rrt()
-        path , actions = tree_path
-        complete_final_path = planner.get_complete_trajectory(tree_path)
-        
-        # execution
-        execution_car = CarRobot(q0 = start ,
-                                actuation_noise= actuation_noise_model[args.noise] ,
-                                odometry_noise= odometry_noise_model[args.noise] ,
-                                observation_noise = observation_noise_model[args.noise],
-                                viz_out= viz_out, 
-                                landmarks= land_mark_pos )
-        
-        current_state = start
-        ground_truth_trajectory = []
-        odometry_data = []
-        landmark_data = []
-        actuation_data = []
-        for action in actions:
-            trajectory,actuation_info,odometry_info,landmark_info = execution_car.simulate_trajectory(u=action[0], q0=current_state, duration= action[1])
-            ground_truth_trajectory.extend(trajectory)
-            actuation_data.extend(actuation_info)
-            odometry_data.extend(odometry_info)
-            landmark_data.extend(landmark_info)
-
-        data_collection.write_data_to_files( args.problem[0] , args.noise , actions , ground_truth_trajectory , actuation_data , odometry_data , landmark_data)
-
-
+    land_mark_pos = data_collection.load_landmarks(map_file) # load land_mark data
+       
+    # planning 
+    planner = RRTPlanner( viz_out ,start, goal, None , None , None , None)
+    tree_path = planner.rrt()
+    path , actions = tree_path
+    complete_final_path = planner.get_complete_trajectory(tree_path)
+    # # execution
+    brown = "0x8b6c5c"
+    planner.get_trajectory_path_visualization( complete_final_path , brown )
+    execution_car = CarRobot(q0 = start ,
+                            actuation_noise= actuation_noise_model[args.noise] ,
+                            odometry_noise= odometry_noise_model[args.noise] ,
+                            observation_noise = observation_noise_model[args.noise],
+                            viz_out= viz_out, 
+                            landmarks= land_mark_pos )
+    current_state = start
+    ground_truth_trajectory = []
+    odometry_data = []
+    landmark_data = []
+    actuation_data = []
+    for action in actions:
+        trajectory,actuation_info,odometry_info,landmark_info,current_state = execution_car.simulate_trajectory(u=action[0], q0=current_state, duration= action[1])
+        ground_truth_trajectory.extend(trajectory)
+        actuation_data.extend(actuation_info)
+        odometry_data.extend(odometry_info)
+        landmark_data.extend(landmark_info)
+    black = "0x000000"   
+    data_collection.write_data_to_files( int(args.problem[0]), args.noise , actions , ground_truth_trajectory , actuation_data , odometry_data , landmark_data)
+    planner.get_trajectory_path_visualization( ground_truth_trajectory , black )
+    viz_out.to_html(f"data_collection_{int(args.problem[0])}.html" , "out/")
+    print("DoneDone")
     
     

@@ -13,7 +13,7 @@ class RRTPlanner:
         self.viz_out = viz_out
         self.start = start
         self.goal = goal
-        self.obstacles = self.read_obstacles(obstacles_file)
+        self.obstacles = self.read_obstacles(obstacles_file) if obstacles_file != None else None
         self.tree = Tree(tuple(start))
         self.goal_threshold_trans = 0.1
         self.goal_threshold_rot = 0.5
@@ -80,15 +80,16 @@ class RRTPlanner:
             return True
         
     def obstacle_collision_check(self , car_state ):
-        for obstacle in self.obstacles:
-            sphere_position = np.array(obstacle[:3])
-            sphere_radius = obstacle[3]
-            if self.is_collision_free_check( car_state , sphere_position , sphere_radius):
-                return True
+        if self.obstacles :
+            for obstacle in self.obstacles:
+                sphere_position = np.array(obstacle[:3])
+                sphere_radius = obstacle[3]
+                if self.is_collision_free_check( car_state , sphere_position , sphere_radius):
+                    return True
         return False    
 
     def calculate_car_path_without_collision(self, car_controls, start_config , duration ):
-        trajectory,_,_,_ = self.car_robot.simulate_trajectory( car_controls , start_config , duration)
+        trajectory,_,_,_,_ = self.car_robot.simulate_trajectory( car_controls , start_config , duration)
         for car_state in trajectory:
             if self.obstacle_collision_check(car_state) == True:
                 return -1
@@ -135,11 +136,11 @@ class RRTPlanner:
                     # print(" control , duration , trajectory[-1]", control , duration , trajectory[-1])
                     break
             if self.is_goal_region(trajectory[-1]):
-                # print("goal region reached")
+                print("goal region reached")
                 return self.tree.get_path_to_goal(trajectory[-1])
             
         nearest_state = self.nearest(list(self.tree.list_nodes.keys()), self.goal)
-        # print("goal region could not be reached but the path till the neaest point is:")    
+        print("goal region could not be reached but the path till the neaest point is:")    
         return self.tree.get_path_to_goal(nearest_state)
 
     # def get_visual_trajectory(self,tree_path):
@@ -158,7 +159,6 @@ class RRTPlanner:
             complete_path.extend(self.tree.branch_configs[tuple([path[i-1] , path[i]])])
         return complete_path
 
-
     def get_tree_visualization(self):
         black = "0x000000"
         all_connections = list(self.tree.branch_configs.values())
@@ -167,6 +167,11 @@ class RRTPlanner:
             all_connections[i] = x.tolist()
         for i in range(len(all_connections)):
             self.viz_out.add_line(all_connections[i] , black)
+
+    def get_trajectory_path_visualization(self , trajectory , color):
+        for i, x in enumerate(trajectory):
+            x[2] = 0.5
+            self.viz_out.add_line(trajectory , color)
 
     def landmark_creation(self):
         landmark_counts = [5, 5, 8, 12, 12]

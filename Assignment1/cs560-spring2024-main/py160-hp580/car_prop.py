@@ -80,10 +80,10 @@ class CarRobot:
                 odometry_reading_list.append(self.odometry_measurement(u_e))
             if self.observation_noise != None:
                 landmark_mesurement_list.append(self.get_all_landmark_observations(q))
-        return np.array(trajectory),actuation_control_list,odometry_reading_list , landmark_mesurement_list
+        return np.array(trajectory),actuation_control_list,odometry_reading_list , landmark_mesurement_list, q
     
     def visualize_trajectory(self, u , q0 ):
-        trajectory,_,_,_ = self.simulate_trajectory(u , q0)
+        trajectory,_,_,_,_ = self.simulate_trajectory(u , q0)
         yellow = "0xFFFF00"
         black = "0x000000"
         car_trajectory = []
