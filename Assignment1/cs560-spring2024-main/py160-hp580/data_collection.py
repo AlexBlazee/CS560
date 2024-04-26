@@ -65,7 +65,7 @@ if __name__ == "__main__":
         
     map_file = args.map # landmark file
     start = [5 , 25, 0.5] #  random start 
-    goal = [0, -25, 0.5] # random end
+    goal = [17, 10, 0.5] # random end
 
     data_collection = DataCollection(viz_out, start, goal, map_file )  
     data_collection.visualize_landmarks()
