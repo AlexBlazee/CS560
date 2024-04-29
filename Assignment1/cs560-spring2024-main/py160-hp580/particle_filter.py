@@ -17,7 +17,15 @@ class ParticleFilter:
         self.particles = self.initialize_particles()      
         self.weights = np.ones(num_particles) / num_particles  # Initialize weights uniformly      
         self.car_robot = CarRobot(q0=self.start_state, actuation_noise=None, odometry_noise=None, observation_noise=None, viz_out=viz_out, landmarks=self.map_data)
-  
+        
+        self.problem_id = odometry_file.split('_')[-2]
+        self.noise_level = odometry_file.split('_')[-1]
+        self.execution_car = CarRobot(q0 = None ,actuation_noise= None, odometry_noise= None ,observation_noise = None,
+                             viz_out= viz_out, landmarks= None )
+        self.odometry_noise = self.execution_car.odometry_noise_model[self.noise_level]
+        self.observation_noise = self.execution_car.observation_noise_model[self.noise_level]
+        self.actuation_noise = self.execution_car.actuation_noise_model[self.noise_level]
+
     def load_start_state(self, filename):  
         with open(filename, 'r') as file:  
             for line in file:  
@@ -30,6 +38,7 @@ class ParticleFilter:
         particles = np.zeros((self.num_particles, 3))  
         particles[:, :2] = self.start_state[:2]  # Initialize particles' positions to the start position  
         particles[:, 2] = np.random.uniform(-np.pi, np.pi, self.num_particles)  # Randomize particles' orientations  
+
         return particles  
   
     def motion_update(self, odometry):  
@@ -147,8 +156,8 @@ if __name__ == "__main__":
     parser.add_argument("--plan", type=str, required=True)      
     parser.add_argument("--num_particles", type=int, required=True)      
     args = parser.parse_args()      
-      
+    
     particle_filter = ParticleFilter(viz_out, args.num_particles, args.map, args.odometry, args.landmarks, args.plan)      
     particle_filter_states = particle_filter.run_particle_filter()      
-    viz_out.to_html("particle_filter.html", "../out/") 
+    viz_out.to_html("particle_filter.html", "out/") 
 

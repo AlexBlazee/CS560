@@ -19,7 +19,7 @@ class DeadReckoning:
         self.odometry_data = self.load_data(odometry_file)
         self.landmark_data = self.load_data(landmarks_file)
         self.landmarks =   self.load_landmarks(map_file)
-        self.visualize_landmarks()
+       
         
     def load_landmarks(self, landmarks_file):  
         with open(landmarks_file, 'r') as file:  
@@ -116,6 +116,7 @@ if __name__ == "__main__":
     red = "0xff0000"  
 
     dead_reckoning = DeadReckoning(viz_out , args.map, args.odometry, args.landmarks, args.plan)
+    dead_reckoning.visualize_landmarks()
     dead_reckoning_states = dead_reckoning.dead_reckoning_trajectory(dead_reckoning.odometry_data , dead_reckoning.start_state)
     ground_truth_data = dead_reckoning.load_data(f"./py160-hp580/data/gt_{args.odometry.split('_')[-2]}_{args.odometry.split('_')[-1].split('.')[0]}.txt")  
     problem_id = args.odometry.split('_')[-2]
