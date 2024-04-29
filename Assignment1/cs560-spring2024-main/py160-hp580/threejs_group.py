@@ -88,6 +88,10 @@ class threejs_group(object):
 
     def add_obstacle(self, geom, color="0xff0000"):
         self._obstacles.append([geom, color])
+    
+    def remove_obstacle(self, obstacle):  
+        if obstacle in self._obstacles:  
+            self._obstacles.remove(obstacle) 
 
     def add_animation(self, box, trajectory):
         self._animation.append([box, trajectory])

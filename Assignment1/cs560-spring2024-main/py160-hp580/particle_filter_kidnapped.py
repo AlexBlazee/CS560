@@ -1,37 +1,36 @@
-import argparse 
-import numpy as np 
-from geometry import *
-import numpy as np
-from geometry import *
-from threejs_group import *
-from car_prop import CarRobot
+import argparse  
+import numpy as np  
+from geometry import *  
+from threejs_group import *  
+from car_prop import CarRobot  
+from particle_filter import ParticleFilter
 
-class ParticleFilter:  
-    def __init__(self, viz_out, num_particles, map_file, odometry_file, landmarks_file, plan_file):      
-        self.viz_out = viz_out      
-        self.num_particles = num_particles      
-        self.map_data = np.loadtxt(map_file)      
-        self.odometry_data = np.loadtxt(odometry_file)      
-        self.landmark_data = np.loadtxt(landmarks_file)      
-        self.start_state = self.load_start_state(plan_file)      
-        self.particles = self.initialize_particles()      
-        self.weights = np.ones(num_particles) / num_particles  # Initialize weights uniformly      
-        self.car_robot = CarRobot(q0=self.start_state, actuation_noise=None, odometry_noise=None, observation_noise=None, viz_out=viz_out, landmarks=self.map_data)
+class UnknownStartParticleFilter(ParticleFilter):  
+    def __init__(self, *args, **kwargs):  
+        super().__init__(*args, **kwargs)  
   
+    def initialize_particles(self):  
+        particles = np.zeros((self.num_particles, 3))  
+  
+        # Randomize particles' positions within the environment bounds  
+        x_range = (-50, 50)  
+        y_range = (-50, 50)  
+        particles[:, 0] = np.random.uniform(x_range[0], x_range[1], self.num_particles)  
+        particles[:, 1] = np.random.uniform(y_range[0], y_range[1], self.num_particles)  
+  
+        # Randomize particles' orientations  
+        particles[:, 2] = np.random.uniform(-np.pi, np.pi, self.num_particles)  
+  
+        return particles  
+    
     def load_start_state(self, filename):  
         with open(filename, 'r') as file:  
             for line in file:  
                 line = line.strip().split()  
                 line = [float(x) for x in line]  
                 break  
-        return line  
-  
-    def initialize_particles(self):  
-        particles = np.zeros((self.num_particles, 3))  
-        particles[:, :2] = self.start_state[:2]  # Initialize particles' positions to the start position  
-        particles[:, 2] = np.random.uniform(-np.pi, np.pi, self.num_particles)  # Randomize particles' orientations  
-        return particles  
-  
+        return line
+    
     def motion_update(self, odometry):  
         v, phi = odometry  
         dt = 0.1  
@@ -134,21 +133,18 @@ class ParticleFilter:
             self.viz_out.add_obstacle(geom, "0x808080")  # Grey color for particles  
             particle_objects.append(geom)  
           
-        return particle_objects  
+        return particle_objects
 
-
-
-if __name__ == "__main__":    
-    viz_out = threejs_group(js_dir="../js")      
-    parser = argparse.ArgumentParser()      
-    parser.add_argument("--map", type=str, required=True)      
-    parser.add_argument("--odometry", type=str, required=True)      
+if __name__ == "__main__":  
+    viz_out = threejs_group(js_dir="../js")  
+    parser = argparse.ArgumentParser()  
+    parser.add_argument("--map", type=str, required=True)  
+    parser.add_argument("--odometry", type=str, required=True)  
     parser.add_argument("--landmarks", type=str, required=True)  
-    parser.add_argument("--plan", type=str, required=True)      
-    parser.add_argument("--num_particles", type=int, required=True)      
-    args = parser.parse_args()      
-      
-    particle_filter = ParticleFilter(viz_out, args.num_particles, args.map, args.odometry, args.landmarks, args.plan)      
-    particle_filter_states = particle_filter.run_particle_filter()      
-    viz_out.to_html("particle_filter.html", "../out/") 
-
+    parser.add_argument("--plan", type=str, required=True)  
+    parser.add_argument("--num_particles", type=int, required=True)  
+    args = parser.parse_args()  
+  
+    particle_filter = UnknownStartParticleFilter(viz_out, args.num_particles, args.map, args.odometry, args.landmarks, args.plan)  
+    particle_filter_states = particle_filter.run_particle_filter()  
+    viz_out.to_html("particle_filter_kidnapped.html", "../out/")  
