@@ -15,6 +15,11 @@ class CarRobot:
         self.observation_noise = observation_noise
         self.landmarks = landmarks
 
+        self.actuation_noise_model = {'H': [0.3 , 0.2] , 'L' : [0.1 , 0.05] , 'None': None}  # v,phi
+        self.odometry_noise_model = {'H': [0.15 , 0.1] , 'L' : [0.05 , 0.03] , 'None': None} # v,phi
+        self.observation_noise_model = {'H': [0.5 , 0.25] , 'L' : [0.1 , 0.1] , 'None': None} # d, alpha
+
+
     @staticmethod
     def rotate_z_quaternion(theta):
         return [np.cos(theta/2), 0, 0, np.sin(theta/2)]
