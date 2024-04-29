@@ -51,14 +51,14 @@ class DataCollection:
     def visualize_landmarks(self):
         blue="0x0000ff"
         for i,[x,y] in enumerate(self.landmarks):
-            geom = sphere('obs'+str(i) , 0.5 , [x,y,0.5] , [1,0,0,0] )
+            geom = sphere('obs'+str(i) , 0.5 , [x,y,0] , [1,0,0,0] )
             self.viz_out.add_obstacle(geom , blue)
-        return 
+        return self.viz_out
 
     def get_trajectory_path_visualization(self , trajectory , color):
-        for i, x in enumerate(trajectory):
-            x[2] = 0.5
-            self.viz_out.add_line(trajectory , color)
+        trajectory_list = [arr.tolist()[:-1] + [0.5] for arr in trajectory]
+        self.viz_out.add_line(trajectory_list , color)
+        return self.viz_out
 
     # def landmark_creation(self):
     #     landmark_counts = [5, 5, 8, 12, 12]
@@ -87,8 +87,12 @@ if __name__ == "__main__":
     args = parser.parse_args()
         
     map_file = args.map # landmark file
-    start = [5 , 25, 0] #  random start 
-    goal = [17, -15, 0] # random end
+    # start = [5 , 25, 0] #  random start 
+    # goal = [17, -15, 0] # random end
+
+    start = [np.random.uniform(-50, 50), np.random.uniform(-50, 50), np.random.uniform(-np.pi, np.pi)]
+    goal = [np.random.uniform(-50, 50), np.random.uniform(-50, 50), np.random.uniform(-np.pi, np.pi)]
+
     
     red="0xff0000"
     green="0x00ff00"    
@@ -96,7 +100,6 @@ if __name__ == "__main__":
     geom1 = sphere("goal", 1, [goal[0] , goal[1] , 0.5], [1,0,0,0])
     viz_out.add_obstacle(geom, green)
     viz_out.add_obstacle(geom1, red)
-    print(viz_out._lines)
 
     data_collection = DataCollection(viz_out, start, goal, map_file )  
     data_collection.visualize_landmarks()
@@ -112,12 +115,14 @@ if __name__ == "__main__":
     # # execution
     brown = "0x8b6c5c"
     data_collection.get_trajectory_path_visualization( complete_final_path , brown )
+
     execution_car = CarRobot(q0 = start ,
                             actuation_noise= actuation_noise_model[args.noise] ,
                             odometry_noise= odometry_noise_model[args.noise] ,
                             observation_noise = observation_noise_model[args.noise],
                             viz_out= viz_out, 
                             landmarks= land_mark_pos )
+    
     current_state = start
     ground_truth_trajectory = []
     odometry_data = []
@@ -129,11 +134,15 @@ if __name__ == "__main__":
         actuation_data.extend(actuation_info)
         odometry_data.extend(odometry_info)
         landmark_data.extend(landmark_info)
+    
     black = "0x000000"   
     data_collection.write_data_to_files( int(args.problem[0]), args.noise , actions , ground_truth_trajectory , actuation_data , odometry_data , landmark_data)
     data_collection.get_trajectory_path_visualization( ground_truth_trajectory , black )
-    viz_out.to_html("data_collection_temp.html" , "out/")
-    # viz_out.to_html(f"data_collection_{int(args.problem[0])}.html" , "out/")
+    execution_car.visualize_given_trajectory_name(complete_final_path , "complete_final_path")
+    execution_car.visualize_given_trajectory_name(ground_truth_trajectory , "ground_truth")    
+    execution_car.visualize_landmark_observation(landmark_data ,ground_truth_trajectory )
+    # viz_out.to_html("data_collection_temp.html" , "out/")
+    viz_out.to_html(f"data_collection_{int(args.problem[0])}.html" , "out/")
     print("DoneDone")
     
     
