@@ -55,6 +55,29 @@ class DataCollection:
             self.viz_out.add_obstacle(geom , blue)
         return 
 
+    def get_trajectory_path_visualization(self , trajectory , color):
+        for i, x in enumerate(trajectory):
+            x[2] = 0.5
+            self.viz_out.add_line(trajectory , color)
+
+    # def landmark_creation(self):
+    #     landmark_counts = [5, 5, 8, 12, 12]
+    #     x_range = (-50, 50)
+    #     y_range = (-50, 50)
+    #     for i, count in enumerate(landmark_counts):
+    #         landmarks = np.random.uniform(low=[x_range[0], y_range[0]], high=[x_range[1], y_range[1]], size=(count, 2))
+    #         filename = f"landmark_{i}.txt"
+    #         np.savetxt(filename, landmarks, fmt='%.2f', header=f"{count} 2", comments='')
+
+    # def visualize_landmark(self , file_name):
+    #     grey="#808080"
+    #     self.landmarks = np.loadtxt(file_name , skiprows=1)
+    #     for i,landmark in enumerate(self.landmarks):
+    #         x,y = landmark
+    #         geom = sphere('lm'+str(i) , 1 , [x,y,0] , [1,0,0,0] )
+    #         self.viz_out.add_obstacle(geom , grey)
+    #     return
+
 if __name__ == "__main__":
     viz_out = threejs_group(js_dir="../js")
     parser = argparse.ArgumentParser()
@@ -64,8 +87,16 @@ if __name__ == "__main__":
     args = parser.parse_args()
         
     map_file = args.map # landmark file
-    start = [5 , 25, 0.5] #  random start 
-    goal = [17, 10, 0.5] # random end
+    start = [5 , 25, 0] #  random start 
+    goal = [17, -15, 0] # random end
+    
+    red="0xff0000"
+    green="0x00ff00"    
+    geom = sphere("start", 1, [start[0] , start[1] , 0.5], [1,0,0,0])
+    geom1 = sphere("goal", 1, [goal[0] , goal[1] , 0.5], [1,0,0,0])
+    viz_out.add_obstacle(geom, green)
+    viz_out.add_obstacle(geom1, red)
+    print(viz_out._lines)
 
     data_collection = DataCollection(viz_out, start, goal, map_file )  
     data_collection.visualize_landmarks()
@@ -73,7 +104,6 @@ if __name__ == "__main__":
     odometry_noise_model = {'H': [0.15 , 0.1] , 'L' : [0.05 , 0.03] , 'None': None} # v,phi  
     observation_noise_model = {'H': [0.5 , 0.25] , 'L' : [0.1 , 0.1] , 'None': None} # d, alpha  
     land_mark_pos = data_collection.load_landmarks(map_file) # load land_mark data
-       
     # planning 
     planner = RRTPlanner( viz_out ,start, goal, None , None , None , None)
     tree_path = planner.rrt()
@@ -81,7 +111,7 @@ if __name__ == "__main__":
     complete_final_path = planner.get_complete_trajectory(tree_path)
     # # execution
     brown = "0x8b6c5c"
-    planner.get_trajectory_path_visualization( complete_final_path , brown )
+    data_collection.get_trajectory_path_visualization( complete_final_path , brown )
     execution_car = CarRobot(q0 = start ,
                             actuation_noise= actuation_noise_model[args.noise] ,
                             odometry_noise= odometry_noise_model[args.noise] ,
@@ -101,8 +131,9 @@ if __name__ == "__main__":
         landmark_data.extend(landmark_info)
     black = "0x000000"   
     data_collection.write_data_to_files( int(args.problem[0]), args.noise , actions , ground_truth_trajectory , actuation_data , odometry_data , landmark_data)
-    planner.get_trajectory_path_visualization( ground_truth_trajectory , black )
-    viz_out.to_html(f"data_collection_{int(args.problem[0])}.html" , "out/")
+    data_collection.get_trajectory_path_visualization( ground_truth_trajectory , black )
+    viz_out.to_html("data_collection_temp.html" , "out/")
+    # viz_out.to_html(f"data_collection_{int(args.problem[0])}.html" , "out/")
     print("DoneDone")
     
     

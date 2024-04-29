@@ -140,7 +140,8 @@ class RRTPlanner:
                 return self.tree.get_path_to_goal(trajectory[-1])
             
         nearest_state = self.nearest(list(self.tree.list_nodes.keys()), self.goal)
-        print("goal region could not be reached but the path till the neaest point is:")    
+        # print("goal region could not be reached but the path till the neaest point is:")    
+        print("path calculated")
         return self.tree.get_path_to_goal(nearest_state)
 
     # def get_visual_trajectory(self,tree_path):
@@ -206,9 +207,9 @@ if __name__ == "__main__":
 
     LANDMARK_FILE_NAME = 'landmark_0.txt'
     
-    planner = RRTPlanner( viz_out ,start, goal, obstacles_file)
+    planner = RRTPlanner( viz_out ,start, goal, obstacles_file , None , None , None)
     planner.visualize_obstacles()
-    planner.visualize_landmark(LANDMARK_FILE_NAME)
+    # planner.visualize_landmark(LANDMARK_FILE_NAME)
     tree_path = planner.rrt()
 
     # print(tree_path)

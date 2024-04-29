@@ -35,6 +35,7 @@ class CarRobot:
         x_dot = v * np.cos(theta)
         y_dot = v * np.sin(theta)
         theta_dot = (v / self.L) * np.tan(phi)
+        # theta_dot = (theta_dot + np.pi) % (2 * np.pi) - np.pi
         return np.array([x_dot, y_dot, theta_dot]),[v,phi]
 
     def odometry_measurement(self, u_e):
