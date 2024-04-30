@@ -1,163 +1,156 @@
-import argparse 
-import numpy as np 
-from geometry import *
 import numpy as np
+import argparse
 from geometry import *
 from threejs_group import *
+import os
 from car_prop import CarRobot
 
-class ParticleFilter:  
-    def __init__(self, viz_out, num_particles, map_file, odometry_file, landmarks_file, plan_file):      
-        self.viz_out = viz_out      
-        self.num_particles = num_particles      
-        self.map_data = np.loadtxt(map_file)      
-        self.odometry_data = np.loadtxt(odometry_file)      
-        self.landmark_data = np.loadtxt(landmarks_file)      
-        self.start_state = self.load_start_state(plan_file)      
-        self.particles = self.initialize_particles()      
-        self.weights = np.ones(num_particles) / num_particles  # Initialize weights uniformly      
-        self.car_robot = CarRobot(q0=self.start_state, actuation_noise=None, odometry_noise=None, observation_noise=None, viz_out=viz_out, landmarks=self.map_data)
-        
-        self.problem_id = odometry_file.split('_')[-2]
-        self.noise_level = odometry_file.split('_')[-1]
-        self.execution_car = CarRobot(q0 = None ,actuation_noise= None, odometry_noise= None ,observation_noise = None,
-                             viz_out= viz_out, landmarks= None )
-        self.odometry_noise = self.execution_car.odometry_noise_model[self.noise_level]
-        self.observation_noise = self.execution_car.observation_noise_model[self.noise_level]
-        self.actuation_noise = self.execution_car.actuation_noise_model[self.noise_level]
+class ParticleFilter:
+    def __init__(self, start, landmark_pos, landmarks_data, noise_level, num_particles, viz_out):
+        self.start = start
+        self.landmarks = landmark_pos
+        self.landmark_data = landmarks_data
+        self.car_robot = CarRobot(q0=self.start, actuation_noise=None, odometry_noise=None, observation_noise=None,
+                                  viz_out=viz_out, landmarks=self.landmarks)
+       
+        self.odometry_noise = self.car_robot.odometry_noise_model[noise_level]
+        self.observation_noise = self.car_robot.observation_noise_model[noise_level]
+        self.actuation_noise = self.car_robot.actuation_noise_model[noise_level]
+       
+        self.num_particles = num_particles
+        self.viz_out = viz_out
+       
+        # Initialize particles
+        self.particles = np.zeros((self.num_particles, 3))
+        self.particles[:, :2] = self.start[:2]
+        self.particles[:, 2] = np.random.uniform(-np.pi, np.pi, self.num_particles)
+        self.weights = np.ones(self.num_particles) / self.num_particles
+        self.particle_observations = [[] for _ in range(self.num_particles)]
 
-    def load_start_state(self, filename):  
-        with open(filename, 'r') as file:  
-            for line in file:  
-                line = line.strip().split()  
-                line = [float(x) for x in line]  
-                break  
-        return line  
-  
-    def initialize_particles(self):  
-        particles = np.zeros((self.num_particles, 3))  
-        particles[:, :2] = self.start_state[:2]  # Initialize particles' positions to the start position  
-        particles[:, 2] = np.random.uniform(-np.pi, np.pi, self.num_particles)  # Randomize particles' orientations  
+        self.visualize_landmarks()
 
-        return particles  
-  
-    def motion_update(self, odometry):  
-        v, phi = odometry  
-        dt = 0.1  
-        noise_scale = 0.1  # Adjust based on your model's accuracy  
-  
-        theta = self.particles[:, 2]  
-        theta_dot = (v / 1.5) * np.tan(phi)  # Assuming L = 1.5  
-  
-        # Adding noise to the motion model  
-        delta_x = (v + np.random.normal(0, noise_scale, self.num_particles)) * np.cos(theta) * dt  
-        delta_y = (v + np.random.normal(0, noise_scale, self.num_particles)) * np.sin(theta) * dt  
-        delta_theta = theta_dot * dt + np.random.normal(0, noise_scale, self.num_particles)  
-  
-        # Update particles' positions and orientations  
-        self.particles[:, 0] += delta_x  
-        self.particles[:, 1] += delta_y  
-        self.particles[:, 2] += delta_theta  
-        # Normalize angles  
-        self.particles[:, 2] = (self.particles[:, 2] + np.pi) % (2 * np.pi) - np.pi  
-  
-    def measurement_update(self, landmark_obs):  
-        for i, landmark in enumerate(self.map_data):  
-            # Extract landmark observation for the current landmark  
-            d, alpha = landmark_obs[i * 2:i * 2 + 2]  
-  
-            # Calculate expected distance and angle for each particle to the current landmark  
-            dx = landmark[0] - self.particles[:, 0]  
-            dy = landmark[1] - self.particles[:, 1]  
-            exp_d = np.sqrt(dx**2 + dy**2)  
-            exp_alpha = np.arctan2(dy, dx) - self.particles[:, 2]  
-  
-            # Calculate weights using a Gaussian distribution  
-            self.weights *= np.exp(-((d - exp_d)**2 / (2 * 0.2**2) + (alpha - exp_alpha)**2 / (2 * 0.2**2)))  
-  
-        # Normalize weights  
-        self.weights += 1.e-300  # avoid round-off to zero  
-        self.weights /= sum(self.weights)  
-  
-    def resample_particles(self):  
-        indices = np.random.choice(self.num_particles, self.num_particles, p=self.weights)  
-        self.particles = self.particles[indices]  
-        self.weights = np.ones(self.num_particles) / self.num_particles  # Reset weights after resampling  
-    
-  
-    def run_particle_filter(self):    
-        self.visualize_landmarks()  # Visualize landmarks once at the beginning    
-        particle_objects = []  # Store particle objects for visualization    
-    
-        estimated_states = []    
-        for index, (odometry, landmark_obs) in enumerate(zip(self.odometry_data, self.landmark_data.reshape(-1, len(self.map_data) * 2))):    
-            self.motion_update(odometry)    
-            self.measurement_update(landmark_obs)    
-            self.resample_particles()    
-            estimated_state = np.average(self.particles, axis=0, weights=self.weights)    
-            estimated_states.append(estimated_state)    
-    
-            #particle_objects = self.update_particle_visualization(particle_objects)  
-    
-        self.visualize_robot(estimated_states)    
-        return np.array(estimated_states)  
+    def resample(self):
+        indices = np.random.choice(self.num_particles, self.num_particles, p=self.weights)
+        self.particles = self.particles[indices]
+        self.weights = np.ones(self.num_particles) / self.num_particles
 
-    def visualize_robot(self, estimated_states):   
-        simplified_trajectory = []  
-        for state in estimated_states:  
-            x, y, theta = state  
-            simplified_trajectory.append([x, y, theta])  # Only include x, y, and theta  
-    
-        # Now pass this simplified trajectory to the CarRobot for visualization  
-        self.car_robot.visualize_given_trajectory(simplified_trajectory)  
- 
-    def visualize_landmark_observations(self, estimated_state): 
-        x, y, theta = estimated_state  
-        for i, landmark in enumerate(self.map_data):  
-            landmark_x, landmark_y = landmark[:2]  
-            # Optionally, calculate expected observation from estimated_state to landmark  
-            # For simplicity, just drawing a line from estimated position to landmark  
-            self.viz_out.add_line([[x, y, 0.5], [landmark_x, landmark_y, 0.5]], color="0xff0000")  # Red lines  
+    def update_particles(self, odometry):
+        # Update particles based on odometry
+        for i, particle in enumerate(self.particles):
+            x, y, theta = particle
+            v, phi = odometry
+            if self.odometry_noise is not None:
+                v = np.random.normal(v, np.sqrt(self.odometry_noise[0]))
+                phi = np.random.normal(phi, np.sqrt(self.odometry_noise[1]))
+            x_dot = v * np.cos(theta)
+            y_dot = v * np.sin(theta)
+            theta_dot = (v / self.car_robot.L) * np.tan(phi)
+            self.particles[i] = [x + x_dot * self.car_robot.dt, y + y_dot * self.car_robot.dt, (theta + theta_dot * self.car_robot.dt) % (2 * np.pi) - np.pi]
 
+    def get_all_landmark_observations(self, particles):
+        landmark_observations = []
+        for particle in particles:
+            x, y, theta = particle
+            particle_observations = []
+            for landmark in self.landmarks:
+                d = np.sqrt((landmark[0] - x)**2 + (landmark[1] - y)**2)
+                alpha = np.arctan2(landmark[1]-y,landmark[0]-x) - theta
+                if self.observation_noise:
+                    d = np.random.normal(d, np.sqrt(self.observation_noise[0]))
+                    alpha = np.random.normal(alpha, np.sqrt(self.observation_noise[1]))
+                particle_observations.extend([d, alpha])
+            landmark_observations.append(particle_observations)
+        return landmark_observations
 
-    def visualize_landmarks(self):    
-        for i, landmark in enumerate(self.map_data):    
-            x, y = landmark[:2]  
-            geom = sphere(f'landmark_{i}', 0.5, [x, y, 0.5], [1, 1, 0, 0])  
-            self.viz_out.add_obstacle(geom, "0x0000ff")  
-  
+    def update_weights(self, landmark_observations):
+        # Update weights based on landmark observations
+        new_weights = []
+        for j, particle in enumerate(self.particles):
+            x, y, theta = particle
+            weight = 1
+            for i in range(len(self.landmarks)):
+                d, alpha = landmark_observations[j][i*2], landmark_observations[j][i*2+1]
+                expected_d = np.sqrt((self.landmarks[i][0] - x)**2 + (self.landmarks[i][1] - y)**2)
+                expected_alpha = np.arctan2(self.landmarks[i][1] - y, self.landmarks[i][0] - x) - theta
+                expected_alpha = (expected_alpha + np.pi) % (2 * np.pi) - np.pi
+                weight *= np.exp(-((d - expected_d)**2 / (2 * self.observation_noise[0]**2) + (alpha - expected_alpha)**2 / (2 * self.observation_noise[1]**2)))
+            new_weights.append(weight)
+        total_weight = sum(new_weights)
+        if total_weight > 0:
+            self.weights = [w / total_weight for w in new_weights]
+        else:
+            # Handle the case where all weights are zero
+            self.weights = [1.0 / self.num_particles] * self.num_particles
 
- 
-    def update_particle_visualization(self, particle_objects):  
-        # Remove previous particle objects  
-        for particle_object in particle_objects:  
-            self.viz_out.remove_obstacle(particle_object)  
-          
-        # Clear the list of particle objects  
-        particle_objects.clear()  
-          
-        # Add updated particle objects  
-        for i, particle in enumerate(self.particles):  
-            x, y, theta = particle  
-            geom = sphere(f'particle_{i}', 0.05, [x, y, 0.5], [0.7, 0.7, 0.7, 0.5])  
-            self.viz_out.add_obstacle(geom, "0x808080")  # Grey color for particles  
-            particle_objects.append(geom)  
-          
-        return particle_objects  
+    def get_estimated_pose(self):
+        # Compute the weighted mean of the particles as the estimated pose
+        x = np.average(self.particles[:, 0], weights=self.weights)
+        y = np.average(self.particles[:, 1], weights=self.weights)
+        theta = np.arctan2(np.sum(np.sin(self.particles[:, 2]) * self.weights), np.sum(np.cos(self.particles[:, 2]) * self.weights))
+        return [x, y, theta]
 
+    def add_particle_info(self, t):
+        # Visualize the particles
+        for i, p in enumerate(self.particles):
+            self.particle_observations[i].append([t, [p[0], p[1], 0.5], [1, 0, 0, 0], "#088F8F"])
 
+    def visualize_particles(self):
+        for i in range(self.num_particles):
+            geom = sphere('part_' + str(i), 0.5, self.particle_observations[i][0][1], self.particle_observations[i][0][2])
+            self.viz_out.add_animation(geom, self.particle_observations[i])
+        return self.viz_out
 
-if __name__ == "__main__":    
-    viz_out = threejs_group(js_dir="../js")      
-    parser = argparse.ArgumentParser()      
-    parser.add_argument("--map", type=str, required=True)      
-    parser.add_argument("--odometry", type=str, required=True)      
-    parser.add_argument("--landmarks", type=str, required=True)  
-    parser.add_argument("--plan", type=str, required=True)      
-    parser.add_argument("--num_particles", type=int, required=True)      
-    args = parser.parse_args()      
-    
-    particle_filter = ParticleFilter(viz_out, args.num_particles, args.map, args.odometry, args.landmarks, args.plan)      
-    particle_filter_states = particle_filter.run_particle_filter()      
-    viz_out.to_html("particle_filter.html", "out/") 
+    def visualize_landmarks(self):
+        blue = "0x0000ff"
+        for i, [x, y] in enumerate(self.landmarks):
+            geom = sphere('obs' + str(i), 0.5, [x, y, 0.5], [1, 0, 0, 0])
+            self.viz_out.add_obstacle(geom, blue)
+        return
 
+# ... (rest of the file remains unchanged) # ... (previous ParticleFilter class code)
+
+if __name__ == "__main__":
+    viz_out = threejs_group(js_dir="../js")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--map", type=str, required=True)
+    parser.add_argument("--odometry", type=str, required=True)
+    parser.add_argument("--landmarks", type=str, required=True)
+    parser.add_argument("--plan", type=str, required=True)
+    parser.add_argument("--num_particles", type=int, required=True)
+    args = parser.parse_args()
+
+    red = "0xff0000"
+    gt_col = "#3CB371"
+    estimate_col = "#964B00"
+    # Load data
+    landmark_pos = np.loadtxt(args.map)
+    start = np.loadtxt(args.plan, max_rows=1)
+    landmarks_data = np.loadtxt(args.landmarks, skiprows=1)
+    odometry = np.loadtxt(args.odometry)
+    problem_id = args.odometry.split('_')[-2]
+    noise_level = args.odometry.split('_')[-1][0]
+    pf = ParticleFilter(start, landmark_pos, landmarks_data, noise_level, args.num_particles, viz_out)
+   
+    pose_estimates = []
+    # Run particle filter
+    for t in range(len(odometry)):
+        pf.update_particles(odometry[t])
+        landmark_observations = pf.get_all_landmark_observations(pf.particles)
+        pf.update_weights(landmark_observations)
+        pf.resample()
+        estimated_pose = pf.get_estimated_pose()
+        pose_estimates.append(estimated_pose)
+        pf.add_particle_info(t)
+
+    np.savetxt(f"./py160-hp580/data/pf_estimates_{problem_id}_{noise_level}_{args.num_particles}.txt", pose_estimates)
+    gt_trajectory = np.loadtxt(f'./py160-hp580/data/gt_{problem_id}_{noise_level}.txt')
+    estimates_trajectory = [[x, y, 0.5] for x, y, _ in pose_estimates]
+    gt_traj = [[x, y, 0.5] for x, y, _ in gt_trajectory]
+
+    pf.car_robot.visualize_linepath_color(np.array(estimates_trajectory), estimate_col)
+    pf.car_robot.visualize_given_trajectory_name(estimates_trajectory, "est_traj")
+    pf.car_robot.visualize_linepath_color(np.array(gt_traj), gt_col)
+    pf.car_robot.visualize_given_trajectory_name(gt_traj, "gt_traj")
+
+    pf.visualize_particles()
+    viz_out.to_html("particle_filter.html", "out/")
